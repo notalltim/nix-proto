@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-22.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
     nix-std.url = "github:chessai/nix-std";
     nix-filter.url = "github:numtide/nix-filter";
   };
@@ -9,7 +9,6 @@
       std = nix-std.lib;
       lib = nixpkgs.lib;
       filter = nix-filter.lib;
-      protoGenerator = (import ./.) { inherit lib; inherit std; inherit filter; };
     in
-    protoGenerator;
+    (import ./.) { inherit lib; inherit std; inherit filter; };
 }

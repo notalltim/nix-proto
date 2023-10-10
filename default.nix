@@ -5,6 +5,7 @@
   common = {
     toProtocInclude = x: lib.lists.fold (a: b: "-I=" + toString (a.src) + " " + b) "" x;
   };
+
   proto_lib = std // lib // common;
 
   generateMeta = { name, dir, version, protoDeps }:
@@ -30,7 +31,7 @@
     let
       python = (import ./python) { inherit meta; inherit proto_lib; };
     in
-    python.package;
+    python.proto_package;
 
   generateGRPCPython = { meta }:
     let
@@ -47,10 +48,13 @@
   generateOverlay = { meta }:
     let
       derivations = generateDerivations { inherit meta; };
-      inherit (lib.attrsets) mapAttrs' nameValuePair mergeAttrsList;
+      inherit (lib.attrsets) mapAttrs' nameValuePair;
     in
     final: prev: (mapAttrs' (key: value: nameValuePair (lib.strings.removeSuffix "_drv" key) (prev.callPackage value { })) derivations);
 
   generateOverlays = { metas }:
-    lib.lists.forEach metas (meta: (generateOverlay { inherit meta; }));
+    let
+      inherit (lib.lists) forEach;
+    in
+    forEach metas (meta: (generateOverlay { inherit meta; }));
 }
