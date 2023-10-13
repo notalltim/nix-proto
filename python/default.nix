@@ -19,7 +19,7 @@
     format = "pyproject";
     pyproject = true;
     dependencies = inputDependencies ++ [ "protobuf" ] ++ toPythonDependencies meta.protoDeps;
-    py_project_toml = toPyProjectTOML { inherit name; inherit version; inherit dependencies; meta_name = meta.name; };
+    py_project_toml = toPyProjectTOML { inherit name; inherit version; inherit dependencies; };
 
     prePatch = ''
       mkdir -p src/${name}
