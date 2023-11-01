@@ -2,8 +2,10 @@
 , std
 , filter
 }: rec {
-  common = {
+  common = rec {
     toProtocInclude = x: lib.lists.fold (a: b: "-I=" + toString (a.src) + " " + b) "" x;
+    recursiveDeps = deps: proto_lib.lists.concatMap (y: (if builtins.length y.protoDeps != 0 then [ (recursiveDeps y.protoDeps) ] else [ ]) ++ [ y ]) deps;
+    recursiveProtoDeps = deps: proto_lib.lists.unique ((proto_lib.lists.flatten (recursiveDeps deps)));
   };
 
   proto_lib = std // lib // common;
@@ -39,10 +41,24 @@
     in
     python.grpc_package;
 
+  generateCpp = { meta }:
+    let
+      cpp = (import ./cpp) { inherit meta; inherit proto_lib; };
+    in
+    cpp.package_protobuf;
+
+  generateGRPCCpp = { meta }:
+    let
+      cpp = (import ./cpp) { inherit meta; inherit proto_lib; };
+    in
+    cpp.package_grpc;
+
   generateDerivations = { meta }: rec {
     ${meta.name + "_proto_" + "drv"} = generateProto { inherit meta; };
     ${meta.name + "_proto_" + "py_drv"} = generatePython { inherit meta; };
-    ${meta.name + "_proto_" + "grpc_py_drv"} = generateGRPCPython { inherit meta; };
+    ${meta.name + "_grpc_" + "py_drv"} = generateGRPCPython { inherit meta; };
+    ${meta.name + "_proto_" + "cpp_drv"} = generateCpp { inherit meta; };
+    ${meta.name + "_grpc_" + "cpp_drv"} = generateGRPCCpp { inherit meta; };
   };
 
   generateOverlay = { meta }:

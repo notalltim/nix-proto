@@ -3,6 +3,7 @@
   toPythonDependencies = x: proto_lib.lists.forEach x (a: builtins.toString (a.name + "_proto_py") + ">=" + builtins.toString (a.version));
   toPyProjectTOML = (import ./pyproj.nix) { std = proto_lib; };
   toBuildDepsPy = x: pkgs: proto_lib.lists.forEach x (a: pkgs.${a.name + "_proto_py"});
+  protoDeps = proto_lib.recursiveProtoDeps meta.protoDeps;
 
 
 
@@ -26,7 +27,19 @@
     '';
     patchPhase = inputPatchPhase;
     postPatch = ''
-      for d in src/**/*/; do touch -- "$d/__init__.py"; done
+      shopt -s globstar
+      declare -A deps=${proto_lib.string.escapeShellArg("(" + (proto_lib.concatMapStringsSep " " (dep: "[\"" +  dep.name + "\"]" + "=\"" + dep.src + "\"")  (protoDeps ++ [ meta ])) + ")")}
+      # Prefix all the imports with the container package
+      echo "Patching proto imports"
+      for dep in "''${!deps[@]}"; do
+          for proto in `find "''${deps[''${dep}]}" -type f -name "*.proto"`; do
+            path=$(realpath --relative-to="''${deps[''${dep}]}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././;s/\.[^.]*$//')
+            for py in `find "./src/${meta.name + suffix}" -type f -name "*_pb2.py"`; do
+              sed -i "s/from\ $path/from\ ''${dep}_proto_py.$path/g" $py
+          done
+        done
+      done
+
       cat > pyproject.toml << EOF ${py_project_toml}
       EOF
     '';
@@ -42,12 +55,8 @@
         runHook prePatch
         shopt -s globstar
         for proto in `find "${meta.src}" -type f -name "*.proto"`; do
-          protoc ${(proto_lib.toProtocInclude (meta.protoDeps ++ [ meta ]))} --python_out=src/${meta.name + suffix} $proto
+          protoc ${(proto_lib.toProtocInclude (protoDeps ++ [ meta ]))} --python_out=src/${meta.name + suffix} $proto
           echo  "from .$(realpath --relative-to="${meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2 import *" >> src/${meta.name + suffix}/__init__.py
-        done
-        path=$(realpath --relative-to="${meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././;s/\.[^.]*$//')
-        for py in `find "./src/${meta.name + suffix}" -type f -name "*_pb2.py"`; do
-          sed -i "s/from\ $path/from\ ./g" $py
         done
         runHook postPatch
       '';
@@ -61,18 +70,14 @@
     inherit pkgs;
     suffix = "_grpc_py";
     buildInputs = [ python310Packages.grpcio python310Packages.grpcio-tools grpc openssl zlib stdenv ] ++ (toBuildDepsPy [ meta ] pkgs);
-    inputDependencies = [ "grpcio" ];
+    inputDependencies = [ "grpcio" "pipdeptree" ];
     inputPatchPhase =
       ''
         runHook prePatch
         shopt -s globstar
         for proto in `find "${meta.src}" -type f -name "*.proto"`; do
-          python -m grpc_tools.protoc ${ (proto_lib.toProtocInclude (meta.protoDeps ++ [ meta ]))} --grpc_python_out=src/${meta.name + suffix} $proto
+          python -m grpc_tools.protoc ${ (proto_lib.toProtocInclude (protoDeps ++ [ meta ]))} --grpc_python_out=src/${meta.name + suffix} $proto
           echo  "from .$(realpath --relative-to="${meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2_grpc import *" >> src/${meta.name + suffix}/__init__.py
-        done
-        path=$(realpath --relative-to="${meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././;s/\.[^.]*$//')
-        for py in `find "./src/${meta.name + suffix}" -type f -name "*_pb2_grpc.py"`; do
-          sed -i "s/from\ $path/from\ ${meta.name}_proto_py.$path/g" $py
         done
         runHook postPatch
       '';
