@@ -70,7 +70,7 @@
     inherit pkgs;
     suffix = "_grpc_py";
     buildInputs = [ python310Packages.grpcio python310Packages.grpcio-tools grpc openssl zlib stdenv ] ++ (toBuildDepsPy [ meta ] pkgs);
-    inputDependencies = [ "grpcio" "pipdeptree" ];
+    inputDependencies = [ "grpcio" ];
     inputPatchPhase =
       ''
         runHook prePatch
