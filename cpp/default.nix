@@ -37,13 +37,13 @@
     separateDebugInfo = true;
   };
 
-  package_grpc = { stdenv, cmake, protobuf, grpc, pkgconfig, openssl, zlib, c-ares, pkgs }: stdenv.mkDerivation rec {
+  package_grpc = { stdenv, cmake, protobuf, grpc, pkg-config, openssl, zlib, c-ares, pkgs }: stdenv.mkDerivation rec {
     name = meta.name + "_grpc_cpp";
     src = meta.src;
     version = meta.version;
     propagatedBuildInputs = [ protobuf grpc openssl ] ++ (toBuildDepsCpp (meta.protoDeps ++ [ meta ]) pkgs);
     nativeBuildInputs = [ cmake protobuf ];
-    propagatedNativeBuildInputs = [ pkgconfig ];
+    propagatedNativeBuildInputs = [ pkg-config ];
     cmakeFlags = [
       "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
       "-DCPP_NAME=${name}"
