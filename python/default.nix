@@ -35,7 +35,7 @@
           for proto in `find "''${deps[''${dep}]}" -type f -name "*.proto"`; do
             path=$(realpath --relative-to="''${deps[''${dep}]}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././;s/\.[^.]*$//')
             for py in `find "./src/${meta.name + suffix}" -type f -name "*_pb2.py"`; do
-              sed -i "s/from\ $path/from\ ''${dep}_proto_py.$path/g" $py
+              sed -i "s/from\ $path\ import/from\ ''${dep}_proto_py.$path\ import/g" $py
           done
         done
       done
