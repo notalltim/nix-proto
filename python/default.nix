@@ -1,9 +1,12 @@
-{ meta, proto_lib }: rec {
+{ meta, lib }: rec {
+  inherit (lib.lists) forEach;
+  inherit (lib.strings) escapeShellArg concatMapStringsSep;
+  inherit (lib) recursiveProtoDeps toProtocInclude;
 
-  toPythonDependencies = x: proto_lib.lists.forEach x (a: builtins.toString (a.name + "_proto_py") + ">=" + builtins.toString (a.version));
-  toPyProjectTOML = (import ./pyproj.nix) { std = proto_lib; };
-  toBuildDepsPy = x: pkgs: proto_lib.lists.forEach x (a: pkgs.${a.name + "_proto_py"});
-  protoDeps = proto_lib.recursiveProtoDeps meta.protoDeps;
+  toPythonDependencies = x: forEach x (a: builtins.toString (a.name + "_proto_py") + ">=" + builtins.toString (a.version));
+  toPyProjectTOML = (import ./pyproj.nix) { inherit lib; };
+  toBuildDepsPy = x: pkgs: forEach x (a: pkgs.${a.name + "_proto_py"});
+  protoDeps = recursiveProtoDeps meta.protoDeps;
 
 
 
@@ -17,8 +20,8 @@
     propagatedBuildInputs = buildDeps;
     doCheck = false;
 
-    format = "pyproject";
     pyproject = true;
+
     dependencies = inputDependencies ++ [ "protobuf" ] ++ toPythonDependencies meta.protoDeps;
     py_project_toml = toPyProjectTOML { inherit name; inherit version; inherit dependencies; };
 
@@ -28,7 +31,7 @@
     patchPhase = inputPatchPhase;
     postPatch = ''
       shopt -s globstar
-      declare -A deps=${proto_lib.string.escapeShellArg("(" + (proto_lib.concatMapStringsSep " " (dep: "[\"" +  dep.name + "\"]" + "=\"" + dep.src + "\"")  (protoDeps ++ [ meta ])) + ")")}
+      declare -A deps=${escapeShellArg("(" + (concatMapStringsSep " " (dep: "[\"" +  dep.name + "\"]" + "=\"" + dep.src + "\"")  (protoDeps ++ [ meta ])) + ")")}
       # Prefix all the imports with the container package
       echo "Patching proto imports"
       for dep in "''${!deps[@]}"; do
@@ -41,6 +44,10 @@
       done
 
       cat > pyproject.toml << EOF ${py_project_toml}
+      EOF
+      cat > setup.py << EOF
+      from setuptools import setup
+      setup()
       EOF
     '';
   };
@@ -55,7 +62,7 @@
         runHook prePatch
         shopt -s globstar
         for proto in `find "${meta.src}" -type f -name "*.proto"`; do
-          protoc ${(proto_lib.toProtocInclude (protoDeps ++ [ meta ]))} --python_out=src/${meta.name + suffix} $proto
+          protoc ${(toProtocInclude (protoDeps ++ [ meta ]))} --python_out=src/${meta.name + suffix} $proto
           echo  "from .$(realpath --relative-to="${meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2 import *" >> src/${meta.name + suffix}/__init__.py
         done
         runHook postPatch
@@ -76,7 +83,7 @@
         runHook prePatch
         shopt -s globstar
         for proto in `find "${meta.src}" -type f -name "*.proto"`; do
-          python -m grpc_tools.protoc ${ (proto_lib.toProtocInclude (protoDeps ++ [ meta ]))} --grpc_python_out=src/${meta.name + suffix} $proto
+          python -m grpc_tools.protoc ${ (toProtocInclude (protoDeps ++ [ meta ]))} --grpc_python_out=src/${meta.name + suffix} $proto
           echo  "from .$(realpath --relative-to="${meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2_grpc import *" >> src/${meta.name + suffix}/__init__.py
         done
         runHook postPatch

@@ -1,22 +1,25 @@
-{ lib
+{ nix_lib
 , std
 , filter
 }: rec {
   common = rec {
-    toProtocInclude = x: lib.lists.fold (a: b: "-I=" + toString (a.src) + " " + b) "" x;
-    recursiveDeps = deps: proto_lib.lists.concatMap (y: (if builtins.length y.protoDeps != 0 then [ (recursiveDeps y.protoDeps) ] else [ ]) ++ [ y ]) deps;
-    recursiveProtoDeps = deps: proto_lib.lists.unique ((proto_lib.lists.flatten (recursiveDeps deps)));
+    inherit (lib.strings) splitString concatStringsSep;
+    inherit (lib.lists) fold flatten concatMap unique;
+    toProtocInclude = x: fold (a: b: "-I=" + toString (a.src) + " " + b) "" x;
+    recursiveDeps = deps: concatMap (y: (if builtins.length y.protoDeps != 0 then [ (recursiveDeps y.protoDeps) ] else [ ]) ++ [ y ]) deps;
+    recursiveProtoDeps = deps: unique ((flatten (recursiveDeps deps)));
+    slashToUnderscore = namespace: concatStringsSep "_" (splitString "/" namespace);
   };
 
-  proto_lib = std // lib // common;
+  lib = std // nix_lib // common;
 
-  generateMeta = { name, dir, version, protoDeps }:
+  generateMeta = { name, dir, version, protoDeps, namespace ? "" }:
     {
-      name = name;
+      name = if namespace == "" then name else (lib.slashToUnderscore namespace) + "_" + name;
       src = filter {
         root = dir;
         include = [
-          name
+          (if namespace == "" then name else namespace)
         ];
       };
       version = version;
@@ -31,25 +34,25 @@
 
   generatePython = { meta }:
     let
-      python = (import ./python) { inherit meta; inherit proto_lib; };
+      python = (import ./python) { inherit meta; inherit lib; };
     in
     python.proto_package;
 
   generateGRPCPython = { meta }:
     let
-      python = (import ./python) { inherit meta; inherit proto_lib; };
+      python = (import ./python) { inherit meta; inherit lib; };
     in
     python.grpc_package;
 
   generateCpp = { meta }:
     let
-      cpp = (import ./cpp) { inherit meta; inherit proto_lib; };
+      cpp = (import ./cpp) { inherit meta; inherit lib; };
     in
     cpp.package_protobuf;
 
   generateGRPCCpp = { meta }:
     let
-      cpp = (import ./cpp) { inherit meta; inherit proto_lib; };
+      cpp = (import ./cpp) { inherit meta; inherit lib; };
     in
     cpp.package_grpc;
 
@@ -65,8 +68,9 @@
     let
       derivations = generateDerivations { inherit meta; };
       inherit (lib.attrsets) mapAttrs' nameValuePair;
+      inherit (lib.strings) removeSuffix;
     in
-    final: prev: (mapAttrs' (key: value: nameValuePair (lib.strings.removeSuffix "_drv" key) (prev.callPackage value { })) derivations);
+    final: prev: (mapAttrs' (key: value: nameValuePair (removeSuffix "_drv" key) (prev.callPackage value { })) derivations);
 
   generateOverlays = { metas }:
     let
