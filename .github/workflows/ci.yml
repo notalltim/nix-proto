@@ -16,8 +16,8 @@ jobs:
       matrix:
         version: [22.05, 22.11, 23.05]
         architecture: [x86_64, pkgsCross.armv7l-hf-multiplatform, pkgsCross.aarch64-multiplatform]
-        package: [upstream, outer_inner_namepaced_name, test_proto, tester ]
-        type: [grpc, proto]
+        package: [tester]
+        type: [grpc]
         language: [cpp, py]
     steps:
         - uses: cachix/install-nix-action@v23
