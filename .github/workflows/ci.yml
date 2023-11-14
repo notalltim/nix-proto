@@ -1,0 +1,31 @@
+name: nix-proto
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [22.05, 22.11, 23.05, unstable]
+        architecture: [x86_64, pkgsCross.armv7l-hf-multiplatform, pkgsCross.aarch64-multiplatform]
+        package: [upstream, outer_inner_namepaced_name, test_proto, tester ]
+        type: [grpc proto]
+        language: [cpp py]
+    steps:
+        - uses: cachix/install-nix-action@v23
+        - uses: actions/checkout@v4
+          with:
+            repository: notalltim/test-apis
+            ref: refs/heads/main
+        - if: ${{ matrix.architecture != 'x86_64'}}
+          run: nix build .#${{matrix.architecture}}.${{ matrix.package }}_${{matrix.type}}_${{matrix.language}}
+        - if: ${{ matrix.architecture == 'x86_64'}}
+          run: nix build .#${{ matrix.package }}_${{matrix.type}}_${{matrix.language}}
