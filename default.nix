@@ -13,9 +13,9 @@
 
   lib = std // nix_lib // common;
 
-  generateMeta = { name, dir, version, protoDeps, namespace ? "" }:
+  generateMeta = { name ? "", dir, version, protoDeps, namespace ? "" }:
     {
-      name = if namespace == "" then name else (lib.slashToUnderscore namespace) + "_" + name;
+      name = if namespace == "" then name else (lib.slashToUnderscore namespace);
       src = filter {
         root = dir;
         include = [
