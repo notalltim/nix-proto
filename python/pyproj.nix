@@ -1,5 +1,5 @@
-{ std }:
-{ name, version, dependencies }: std.serde.toTOML {
+{ lib }:
+{ name, version, dependencies }: lib.serde.toTOML {
   project = {
     name = name;
     version = version;

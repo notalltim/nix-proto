@@ -1,6 +1,6 @@
 { meta, lib }: rec {
-
-  toBuildDeps = x: pkgs: lib.lists.forEach x (dep: pkgs.${dep.name + "_proto"});
+  inherit (lib.lists) forEach;
+  toBuildDeps = x: pkgs: forEach x (dep: pkgs.${dep.name + "_proto"});
 
   package = { stdenvNoCC, pkgs }: stdenvNoCC.mkDerivation rec {
     name = meta.name + "_proto";

@@ -1,0 +1,34 @@
+name: nix-proto
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [22.05, 22.11, 23.05]
+        architecture: [x86_64]
+        package: [tester]
+        type: [grpc]
+        language: [cpp, py]
+    steps:
+        - uses: cachix/install-nix-action@v23
+        - name: Get branch names
+          id: branch-name
+          uses: tj-actions/branch-names@v7
+        - uses: actions/checkout@v4
+          with:
+            repository: notalltim/test-apis
+            ref: refs/heads/main
+        - if: ${{ matrix.architecture != 'x86_64'}}
+          run: nix build .#${{matrix.architecture}}.${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}}
+        - if: ${{ matrix.architecture == 'x86_64'}}
+          run: nix build .#${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}}
