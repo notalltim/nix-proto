@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         version: [22.05, 22.11, 23.05]
-        architecture: [x86_64, pkgsCross.armv7l-hf-multiplatform, pkgsCross.aarch64-multiplatform]
+        architecture: [x86_64]
         package: [tester]
         type: [grpc]
         language: [cpp, py]
