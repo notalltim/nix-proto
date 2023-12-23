@@ -19,7 +19,7 @@ jobs:
         package: [tester]
         type: [grpc]
         language: [cpp, py]
-        style: [legacy-meta main]
+        style: [legacy-meta, main]
     steps:
         - uses: cachix/install-nix-action@v23
         - name: Get branch names
