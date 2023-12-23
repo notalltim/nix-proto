@@ -55,7 +55,7 @@
     inherit python310Packages;
     inherit protobuf;
     inherit pkgs;
-    proto_meta = (lib.tryLoadMeta __proto_internal_meta_package);
+    proto_meta = (lib.loadMeta __proto_internal_meta_package);
     suffix = "_proto_py";
     inputPatchPhase =
       ''
@@ -75,7 +75,7 @@
     inherit python310Packages;
     inherit protobuf;
     inherit pkgs;
-    proto_meta = (lib.tryLoadMeta __proto_internal_meta_package);
+    proto_meta = (lib.loadMeta __proto_internal_meta_package);
     suffix = "_grpc_py";
     buildInputs = [ python310Packages.grpcio python310Packages.grpcio-tools grpc openssl zlib stdenv ] ++ (toBuildDepsPy [ proto_meta ] pkgs);
     inputDependencies = [ "grpcio" ];

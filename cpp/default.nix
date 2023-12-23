@@ -16,7 +16,7 @@
   utilCMake = (readFile ./util.cmake);
 
   gen_protobuf = { stdenv, cmake, protobuf, pkgs, __proto_internal_meta_package}: stdenv.mkDerivation rec {
-    meta = (lib.tryLoadMeta __proto_internal_meta_package);
+    meta = (lib.loadMeta __proto_internal_meta_package);
     name = meta.name + "_proto_cpp";
     src = meta.src;
     version = meta.version;
@@ -45,7 +45,7 @@
   };
 
   gen_grpc = { stdenv, cmake, protobuf, grpc, pkg-config, openssl, pkgs, __proto_internal_meta_package }: stdenv.mkDerivation rec {
-    meta = (lib.tryLoadMeta __proto_internal_meta_package);
+    meta = (lib.loadMeta __proto_internal_meta_package);
     name = meta.name + "_grpc_cpp";
     src = meta.src;
     version = meta.version;
