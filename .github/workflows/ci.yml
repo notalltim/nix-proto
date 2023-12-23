@@ -30,6 +30,6 @@ jobs:
             repository: notalltim/test-apis
             ref: refs/heads/${{ matrix.style }}
         - if: ${{ matrix.architecture != 'x86_64'}}
-          run: nix build .#${{matrix.architecture}}.${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}} --override-input nix-proto github:notalltim/upstream-apis/${{ matrix.style }}
+          run: nix build .#${{matrix.architecture}}.${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}} --override-input upstream-apis github:notalltim/upstream-apis/${{ matrix.style }}
         - if: ${{ matrix.architecture == 'x86_64'}}
-          run: nix build .#${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}} --override-input nix-proto github:notalltim/upstream-apis/${{ matrix.style }}
+          run: nix build .#${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}} --override-input upstream-apis github:notalltim/upstream-apis/${{ matrix.style }}
