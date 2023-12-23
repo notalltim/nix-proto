@@ -14,11 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [22.05, 22.11, 23.05]
+        version: [22.05, 22.11, 23.05, 23.11]
         architecture: [x86_64]
         package: [tester]
         type: [grpc]
         language: [cpp, py]
+        style: [legacy-meta, main]
     steps:
         - uses: cachix/install-nix-action@v23
         - name: Get branch names
@@ -27,8 +28,8 @@ jobs:
         - uses: actions/checkout@v4
           with:
             repository: notalltim/test-apis
-            ref: refs/heads/main
+            ref: refs/heads/${{ matrix.style }}
         - if: ${{ matrix.architecture != 'x86_64'}}
-          run: nix build .#${{matrix.architecture}}.${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}}
+          run: nix build .#${{matrix.architecture}}.${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}} --override-input upstream-apis github:notalltim/upstream-apis/${{ matrix.style }}
         - if: ${{ matrix.architecture == 'x86_64'}}
-          run: nix build .#${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}}
+          run: nix build .#${{ matrix.package }}_${{matrix.type}}_${{matrix.language}} --override-input nix-proto github:notalltim/nix-proto/${{steps.branch-name.outputs.current_branch}} --override-input nixpkgs github:NixOS/nixpkgs/release-${{ matrix.version}} --override-input upstream-apis github:notalltim/upstream-apis/${{ matrix.style }}

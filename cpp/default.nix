@@ -1,4 +1,4 @@
-{ meta, lib }: rec {
+{ lib }: rec {
   inherit (lib.strings) concatMapStringsSep removePrefix hasSuffix;
   inherit (lib.lists) forEach;
   inherit (lib.filesystem) listFilesRecursive;
@@ -12,12 +12,11 @@
   protobufCmake = (readFile ./CMakeLists.txt.protobuf);
   protobufCmakeConfig = (readFile ./protoConfig.cmake.in);
   grpcCmakeConfig = (readFile ./grpcConfig.cmake.in);
-  protoDeps = recursiveProtoDeps meta.protoDeps;
 
   utilCMake = (readFile ./util.cmake);
-  relativeProto = (concatMapStringsSep ";" (a: removePrefix (meta.src + "/") a) (filter (a: hasSuffix ".proto" a) (listFilesRecursive meta.src)));
 
-  package_protobuf = { stdenv, cmake, protobuf, pkgs }: stdenv.mkDerivation rec {
+  gen_protobuf = { stdenv, cmake, protobuf, pkgs, __proto_internal_meta_package}: stdenv.mkDerivation rec {
+    meta = (lib.tryLoadMeta __proto_internal_meta_package);
     name = meta.name + "_proto_cpp";
     src = meta.src;
     version = meta.version;
@@ -27,7 +26,7 @@
       "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
       "-DCPP_NAME=${name}"
       "-DCPP_VERSION=${version}"
-      "-DPROTOS=${relativeProto}"
+      "-DPROTOS=${(concatMapStringsSep ";" (a: removePrefix (meta.src + "/") a) (filter (a: hasSuffix ".proto" a) (listFilesRecursive meta.src)))}"
       "-DCPP_DEPS=${toCMakeDependencies meta.protoDeps}"
     ];
     cmakeFile = pkgs.writeText "CMakeLists.txt" protobufCmake;
@@ -39,13 +38,14 @@
       cp $utilCMakeFile util.cmake
     '';
     preConfigure = ''
-      cmakeFlags="-DPROTO_DEPS=${(toProtoDepsCMake ((protoDeps) ++ [meta]))};$PWD $cmakeFlags"
+      cmakeFlags="-DPROTO_DEPS=${(toProtoDepsCMake ((recursiveProtoDeps meta.protoDeps) ++ [meta]))};$PWD $cmakeFlags"
     '';
     outputs = [ "out" "dev" ];
     separateDebugInfo = !stdenv.hostPlatform.isStatic;
   };
 
-  package_grpc = { stdenv, cmake, protobuf, grpc, pkg-config, openssl, pkgs }: stdenv.mkDerivation rec {
+  gen_grpc = { stdenv, cmake, protobuf, grpc, pkg-config, openssl, pkgs, __proto_internal_meta_package }: stdenv.mkDerivation rec {
+    meta = (lib.tryLoadMeta __proto_internal_meta_package);
     name = meta.name + "_grpc_cpp";
     src = meta.src;
     version = meta.version;
@@ -56,7 +56,7 @@
       "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
       "-DCPP_NAME=${name}"
       "-DCPP_VERSION=${version}"
-      "-DPROTOS=${relativeProto}"
+      "-DPROTOS=${(concatMapStringsSep ";" (a: removePrefix (meta.src + "/") a) (filter (a: hasSuffix ".proto" a) (listFilesRecursive meta.src)))}"
       "-DCPP_DEPS=${toCMakeDependencies (meta.protoDeps ++ [meta])}"
     ] ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
       "-DCMAKE_CROSSCOMPILING=OFF" # Needed due to GRPC relying on the CMAKE_CROSSCOMPILING for adding the plugin targets
@@ -70,7 +70,7 @@
       cp $utilCMakeFile util.cmake
     '';
     preConfigure = ''
-      cmakeFlags="-DPROTO_DEPS=${(toProtoDepsCMake protoDeps)};$PWD $cmakeFlags"
+      cmakeFlags="-DPROTO_DEPS=${(toProtoDepsCMake (recursiveProtoDeps meta.protoDeps))};$PWD $cmakeFlags"
     '';
     outputs = [ "out" "dev" ];
     separateDebugInfo = !stdenv.hostPlatform.isStatic;
