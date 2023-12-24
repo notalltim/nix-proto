@@ -45,6 +45,8 @@
     ```
 
     - [deps] List of attribute sets minimally containing the name of the base proto.
+    - [pkgs] Package set that this derivation will be built into.
+
     - [returns] List of derivations from the package set that the python package depends on.
 
    */
