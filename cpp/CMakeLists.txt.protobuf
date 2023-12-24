@@ -7,7 +7,6 @@ find_package(Protobuf REQUIRED)
 include(util.cmake)
 
 set_depenencies("${CPP_DEPS}")
-set(CMAKE_INSTALL_ARCHIVEDIR $ENV{dev}/lib)
 
 set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated/")
 file(MAKE_DIRECTORY ${PROTO_BINARY_DIR})
@@ -22,30 +21,19 @@ target_include_directories(${OBJECT_LIBRARY}
 
 target_link_libraries(${OBJECT_LIBRARY} PUBLIC protobuf::libprotobuf)
 
-protobuf_generate(TARGET ${OBJECT_LIBRARY} IMPORT_DIRS ${PROTO_DEPS}
+protobuf_generate(TARGET ${OBJECT_LIBRARY} 
+                  IMPORT_DIRS ${PROTO_DEPS}
                   PROTOC_OUT_DIR "${PROTO_BINARY_DIR}")
 
-set(STATIC_LIBRARY ${PROJECT_NAME})
+set(LIBRARY ${PROJECT_NAME})
 
-add_library(${STATIC_LIBRARY} STATIC $<TARGET_OBJECTS:${OBJECT_LIBRARY}>)
-
-target_include_directories(
-  ${STATIC_LIBRARY} PUBLIC $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-target_link_libraries(${STATIC_LIBRARY} PUBLIC ${STATIC_DEPS}
-                                               protobuf::libprotobuf)
-
-set(SHARED_LIBRARY ${PROJECT_NAME}_shared)
-
-add_library(${SHARED_LIBRARY} SHARED $<TARGET_OBJECTS:${OBJECT_LIBRARY}>)
+add_library(${LIBRARY}  $<TARGET_OBJECTS:${OBJECT_LIBRARY}>)
 
 target_include_directories(
-  ${SHARED_LIBRARY} PUBLIC $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>
+  ${LIBRARY} PUBLIC $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>
                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries(${SHARED_LIBRARY} PUBLIC protobuf::libprotobuf
-                                               ${SHARED_DEPS})
+target_link_libraries(${LIBRARY} PUBLIC ${DEPS} protobuf::libprotobuf)
 
 install(
   DIRECTORY ${PROTO_BINARY_DIR}
@@ -56,7 +44,7 @@ install(
 set(TARGET_FILE ${PROJECT_NAME}Targets)
 
 install(
-  TARGETS ${STATIC_LIBRARY} ${SHARED_LIBRARY}
+  TARGETS ${LIBRARY}
   EXPORT ${TARGET_FILE}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

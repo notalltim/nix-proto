@@ -4,11 +4,13 @@
 }:
 let
 
-  __internal_lib = import ./lib.nix { inherit filter; lib = nix_lib; };
-  inherit (__internal_lib) utilities;
+  internal_lib = import ./lib.nix { inherit filter; lib = nix_lib; };
+  inherit (internal_lib) utilities;
 
-  lib = std // nix_lib // __internal_lib.common;
+  # Internal lib used by code generation and nix generation
+  lib = std // nix_lib // internal_lib.common;
 
+  # Generation functions
   generation = import ./generation.nix { inherit lib; };
 
   #TODO(notalltim): remove this when downstream not using it
