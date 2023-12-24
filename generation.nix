@@ -114,9 +114,9 @@
   /** Python Generation */
   pythonGenerators = (import ./python) { inherit lib; };
   /** Generate a python module for protobuf generation */
-  generatePython = pythonGenerators.gen_protobuf;
+  generatePython = pythonGenerators.protobuf;
   /** Generate a python module for grpc generation */
-  generateGRPCPython = pythonGenerators.gen_grpc;
+  generateGRPCPython = pythonGenerators.grpc;
 
   /** Cpp Generation */
   cppGenerators = (import ./cpp) { inherit lib; };
