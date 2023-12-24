@@ -16,16 +16,12 @@ function(set_depenencies deps)
 
   foreach(dep ${CPP_DEPS_LIST})
     find_package(${dep} REQUIRED)
-    list(APPEND STATIC_DEPS ${dep}::${dep})
-    list(APPEND SHARED_DEPS ${dep}::${dep}_shared)
+    list(APPEND DEPS ${dep}::${dep})
     create_find_dependency(${dep})
     string(APPEND GENERATED_FIND_DEPENDENCY "${FIND_DEPENDENCY_STRING}")
   endforeach()
-  set(STATIC_DEPS
-      ${STATIC_DEPS}
-      PARENT_SCOPE)
-  set(SHARED_DEPS
-      ${SHARED_DEPS}
+  set(DEPS
+      ${DEPS}
       PARENT_SCOPE)
   set(GENERATED_FIND_DEPENDENCY
       ${GENERATED_FIND_DEPENDENCY}

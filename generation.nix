@@ -122,9 +122,9 @@
   /** Cpp Generation */
   cppGenerators = (import ./cpp) { inherit lib; };
   /** Generate a cpp library for protobuf generation */
-  generateCpp = cppGenerators.gen_protobuf;
+  generateCpp = cppGenerators.protobuf;
   /** Generate a cpp library for grpc generation */
-  generateGRPCCpp = cppGenerators.gen_grpc;
+  generateGRPCCpp = cppGenerators.grpc;
 
   /**
     Create a set of derivation to evaluate with `generateOverlay'`
