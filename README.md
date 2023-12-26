@@ -1,5 +1,7 @@
 # nix-proto
 
+![build on releases](https://github.com/notalltim/nix-proto/actions/workflows/build-on-release.yml/badge.svg) ![build on unstable](https://github.com/notalltim/nix-proto/actions/workflows/unstable.yml/badge.svg)
+
 The nix-proto library provides automatic overlay generation and dependency management of code generated from proto files.
 
 ## Features

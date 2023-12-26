@@ -1,0 +1,38 @@
+name: Supported Releases (22.05, 22.11, 23.05, 23.11)
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '12 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-supported-releases:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [22.05, 22.11, 23.05, 23.11]
+        architecture: [x86_64]
+        package: [tester]
+        type: [grpc]
+        language: [cpp, py]
+        style: [legacy-meta, main]
+    steps:
+        - uses: cachix/install-nix-action@v23
+        - name: Get branch names
+          id: branch-name
+          uses: tj-actions/branch-names@v7
+        - uses: actions/checkout@v4
+          with:
+            path: action
+            ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
+        - uses: ./action/actions/build
+          with:
+            language: ${{ matrix.language }}
+            nixpkgs: release-${{ matrix.version }}
+            style: ${{ matrix.style }}
+            generator: ${{ matrix.type }}

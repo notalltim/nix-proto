@@ -33,3 +33,4 @@ runs:
           --override-input nix-proto github:notalltim/nix-proto/${{ steps.branch-name.outputs.current_branch }} \
           --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
           --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
+        shell: bash
