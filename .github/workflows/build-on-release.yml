@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-supported-releases:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,7 +30,7 @@ jobs:
           with:
             path: action
             ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
-        - uses: ./action/actions/build
+        - uses: ./.github/action/actions/build
           with:
             language: ${{ matrix.language }}
             nixpkgs: release-${{ matrix.version }}

@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-supported-releases:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
