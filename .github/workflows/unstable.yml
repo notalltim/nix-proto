@@ -12,11 +12,9 @@ on:
 
 jobs:
   build-unstable:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         branches: [master, nixpkgs-unstable]
-    steps:
-      - uses: ./.github/workflows/build-multiple.yml
-        with: 
-          branch: ${{ matrix.branches }}
+    uses: ./.github/workflows/build-multiple.yml
+    with:
+      branch: ${{ matrix.branches }}

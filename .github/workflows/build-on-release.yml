@@ -12,11 +12,9 @@ on:
 
 jobs:
   build-releases:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         version: [22.05, 22.11, 23.05, 23.11]
-    steps:
-      - uses: ./.github/workflows/build-multiple.yml
-        with: 
-              branch: release-${{ matrix.version }}
+    uses: ./.github/workflows/build-multiple.yml
+    with:
+        branch: release-${{ matrix.version }}
