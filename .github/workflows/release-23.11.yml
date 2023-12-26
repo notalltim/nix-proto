@@ -1,4 +1,4 @@
-name: unstable
+name: 23.11
 on:
   push:
     branches:
@@ -13,5 +13,8 @@ on:
 jobs:
   build-releases:
     uses: ./.github/workflows/build-multiple.yml
+    strategy:
+      matrix:
+        type: [release staging staging-next]
     with:
-        branch: nixpkgs-unstable
+        branch: ${{ matrix.type }}-23.11

@@ -1,4 +1,4 @@
-name: unstable
+name: 22.11
 on:
   push:
     branches:
@@ -14,4 +14,4 @@ jobs:
   build-releases:
     uses: ./.github/workflows/build-multiple.yml
     with:
-        branch: nixpkgs-unstable
+        branch: release-22.11
