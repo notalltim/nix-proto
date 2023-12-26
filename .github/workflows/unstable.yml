@@ -1,4 +1,4 @@
-name: Unstable
+name: unstable
 on:
   push:
     branches:
@@ -11,10 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-unstable:
-    strategy:
-      matrix:
-        branches: [master, nixpkgs-unstable]
+  build-releases:
     uses: ./.github/workflows/build-multiple.yml
     with:
-      branch: ${{ matrix.branches }}
+        branch: unstable
