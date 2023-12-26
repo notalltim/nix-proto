@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [master nixpkgs-unstable]
+        version: [master, nixpkgs-unstable]
         architecture: [x86_64]
         package: [tester]
         type: [grpc]
