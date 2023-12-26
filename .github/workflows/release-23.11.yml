@@ -15,6 +15,6 @@ jobs:
     uses: ./.github/workflows/build-multiple.yml
     strategy:
       matrix:
-        type: [release staging staging-next]
+        type: [release, staging, staging-next]
     with:
         branch: ${{ matrix.type }}-23.11
