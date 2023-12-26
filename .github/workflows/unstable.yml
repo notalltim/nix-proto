@@ -30,7 +30,7 @@ jobs:
           with:
             path: action
             ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
-        - uses: ./.github/action/actions/build
+        - uses: ./action/.github/actions/build
           with:
             language: ${{ matrix.language }}
             nixpkgs: ${{ matrix.version }}
