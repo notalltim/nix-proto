@@ -1,11 +1,5 @@
 name: unstable
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   schedule:
     - cron: '12 6 * * *'
   workflow_dispatch:

@@ -1,10 +1,10 @@
 name: "Build Test Repos"
 description: "build test repos with given input"
 inputs:
-  language: # id of input
-    description: "Language to build with"
+  branch:
+    description: "Branch of repo to build"
     required: true
-    default: "cpp"
+    default: 'main'
   nixpkgs:
     description: "Branch of nixpkgs to checkout"
     required: true
@@ -12,7 +12,7 @@ inputs:
   generator:
     description: "Which generator to build with"
     required: true
-    default: 'grpc'
+    default: 'grpc_cpp'
   style:
     description: "User style legacy or main"
     required: true
@@ -21,17 +21,14 @@ runs:
   using: "composite"
   steps:
       - uses: cachix/install-nix-action@v23
-      - name: Get branch names
-        id: branch-name
-        uses: tj-actions/branch-names@v7
       - uses: actions/checkout@v4
         with:
           repository: notalltim/test-apis
           ref: refs/heads/${{ inputs.style }}
           path: test-repo
       - run: |
-          nix build .#tester_${{ inputs.generator }}_${{ inputs.language }} \
-          --override-input nix-proto github:notalltim/nix-proto/${{ steps.branch-name.outputs.current_branch }} \
+          nix build .#tester_${{ inputs.generator }} \
+          --override-input nix-proto github:notalltim/nix-proto/${{ input.branch }} \
           --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
           --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
         shell: bash

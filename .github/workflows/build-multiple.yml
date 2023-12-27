@@ -16,7 +16,6 @@ jobs:
         language: [cpp, py]
         style: [legacy-meta, main]
     steps:
-        - uses: cachix/install-nix-action@v23
         - name: Get branch names
           id: branch-name
           uses: tj-actions/branch-names@v7
@@ -26,7 +25,7 @@ jobs:
             ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
         - uses: ./action/.github/actions/build
           with:
-            language: ${{ matrix.language }}
             nixpkgs: ${{ inputs.branch }}
             style: ${{ matrix.style }}
-            generator: ${{ matrix.type }}
+            generator: ${{ matrix.type }}_${{ matrix.language }}
+            branch: ${{ steps.branch-name.outputs.current_branch }}
