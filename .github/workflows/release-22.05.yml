@@ -1,4 +1,4 @@
-name: 22.05
+name: "22.05"
 on:
   push:
     branches:
