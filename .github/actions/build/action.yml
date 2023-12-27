@@ -28,7 +28,7 @@ runs:
           path: test-repo
       - run: |
           nix build .#tester_${{ inputs.generator }} \
-          --override-input nix-proto github:notalltim/nix-proto/${{ input.branch }} \
+          --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
           --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
           --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
         shell: bash
