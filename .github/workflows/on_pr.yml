@@ -11,3 +11,13 @@ jobs:
     uses: ./.github/workflows/build-multiple.yml
     with:
         branch: ${{ matrix.branches }}
+  it-all-good:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - build-supported-releases
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
