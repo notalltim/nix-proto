@@ -1,0 +1,11 @@
+name: "23.11 "
+on:
+  schedule:
+    - cron: '12 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-releases:
+    uses: ./.github/workflows/build-multiple.yml
+    with:
+        branch: release-23.11

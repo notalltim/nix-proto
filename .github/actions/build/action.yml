@@ -1,0 +1,38 @@
+name: "Build Test Repos"
+description: "build test repos with given input"
+inputs:
+  branch:
+    description: "Branch of repo to build"
+    required: true
+    default: 'main'
+  nixpkgs:
+    description: "Branch of nixpkgs to checkout"
+    required: true
+    default: 'release-23.11'
+  generator:
+    description: "Which generator to build with"
+    required: true
+    default: 'grpc_cpp'
+  style:
+    description: "User style legacy or main"
+    required: true
+    default: 'main'
+runs:
+  using: "composite"
+  steps:
+      - uses: cachix/install-nix-action@v23
+      - uses: actions/checkout@v4
+        with:
+          repository: notalltim/test-apis
+          ref: refs/heads/${{ inputs.style }}
+          path: test-repo
+      - run: |
+          nix build .#tester_${{ inputs.generator }} \
+          --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
+          --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
+          --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
+        shell: bash
+        working-directory: test-repo
+      - uses: actions/checkout@v4
+        with:
+          path: action

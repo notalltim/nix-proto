@@ -1,0 +1,10 @@
+name: "22.05 "
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build-releases:
+    uses: ./.github/workflows/build-multiple.yml
+    with:
+        branch: release-22.05
