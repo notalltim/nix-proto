@@ -1,181 +1,211 @@
-{ lib }: rec {
+{lib}: rec {
   inherit (lib.lists) forEach;
   inherit (lib.strings) escapeShellArg concatMapStringsSep;
   inherit (lib) recursiveProtoDeps toProtocInclude loadMeta;
 
-  /**
-    Convert a set of attribute sets of metadata to a list of strings representing pyProjectTOML dependencies.
+  /*
+  *
+  Convert a set of attribute sets of metadata to a list of strings representing pyProjectTOML dependencies.
 
-    # Example
+  # Example
 
-    ```nix
-    toPythonDependencies [{name = test; version = '1.1.1'; }] => ["test_proto_py>=1.1.1"]
-    ```
+  ```nix
+  toPythonDependencies [{name = test; version = '1.1.1'; }] => ["test_proto_py>=1.1.1"]
+  ```
 
-    # Type
+  # Type
 
-    ```
-    toPythonDependencies :: List -> List
-    ```
+  ```
+  toPythonDependencies :: List -> List
+  ```
 
-    - [deps] List of attribute sets minimally containing the name and version of the base proto.
-    - [returns] List of Strings of the form `name>=version`
+  - [deps] List of attribute sets minimally containing the name and version of the base proto.
+  - [returns] List of Strings of the form `name>=version`
 
-   */
+  */
   toPythonDependencies = deps: forEach deps (dep: builtins.toString (dep.name + "_proto_py") + ">=" + builtins.toString (dep.version));
 
-  /**
-    Takes metadata (name version and dependencies) and creates a PyProjectTOML
+  /*
+  *
+  Takes metadata (name version and dependencies) and creates a PyProjectTOML
 
-    # Type
+  # Type
 
-    ```
-    toPyProjectTOML :: {name :: String, version :: String, dependencies :: List } -> String
-    ```
-   */
-  toPyProjectTOML = (import ./pyproj.nix) { inherit lib; };
+  ```
+  toPyProjectTOML :: {name :: String, version :: String, dependencies :: List } -> String
+  ```
+  */
+  toPyProjectTOML = (import ./pyproj.nix) {inherit lib;};
 
-  /**
-    Convert a set of attribute sets of metadata to a list of derivations looked up by name from the package set provided.
+  /*
+  *
+  Convert a set of attribute sets of metadata to a list of derivations looked up by name from the package set provided.
 
-    # Type
+  # Type
 
-    ```
-    toBuildDepsPy :: List -> List
-    ```
+  ```
+  toBuildDepsPy :: List -> List
+  ```
 
-    - [deps] List of attribute sets minimally containing the name of the base proto.
-    - [pkgs] Package set that this derivation will be built into.
+  - [deps] List of attribute sets minimally containing the name of the base proto.
+  - [pkgs] Package set that this derivation will be built into.
 
-    - [returns] List of derivations from the package set that the python package depends on.
+  - [returns] List of derivations from the package set that the python package depends on.
 
-   */
+  */
   toBuildDepsPy = deps: pkgs: forEach deps (dep: pkgs.${dep.name + "_proto_py"});
 
-  /**
-    Base function called by both grpc and protobuf generation targets to make a python package.
+  /*
+  *
+  Base function called by both grpc and protobuf generation targets to make a python package.
 
-    Provides a postPatch script that changes the imports in the protobuf generated code to include the top level package created by nix.
-    This enforces a unique name for the python package. Also creates a pyproject TOML using the metadata provided.
+  Provides a postPatch script that changes the imports in the protobuf generated code to include the top level package created by nix.
+  This enforces a unique name for the python package. Also creates a pyproject TOML using the metadata provided.
 
-    # Type
+  # Type
 
-    ```
-    package :: { pkgs :: AttrSet, suffix :: String, inputPatchPhase :: String, buildInputs :: List, inputDependencies :: List, proto_meta :: AttrSet } -> Derivation
-    ```
+  ```
+  package :: { pkgs :: AttrSet, suffix :: String, inputPatchPhase :: String, buildInputs :: List, inputDependencies :: List, proto_meta :: AttrSet } -> Derivation
+  ```
 
-    - [pkgs] Package set that this derivation will be built into.
-    - [suffix] Suffix to apply to the base name of the proto.
-    - [inputPatchPhase] Patch phase to run for this derivation.
-    - [buildInputs] Additional package dependencies.
-    - [inputDependencies] Additional python package dependencies.
-    - [proto_meta] metadata about the protos used to generate the python (name, version, etc.).
-   */
-  package = { pkgs, suffix, inputPatchPhase, buildInputs, inputDependencies, proto_meta }: pkgs.python3Packages.buildPythonPackage rec {
-    name = proto_meta.name + suffix;
-    version = proto_meta.version;
-    src = proto_meta.src;
+  - [pkgs] Package set that this derivation will be built into.
+  - [suffix] Suffix to apply to the base name of the proto.
+  - [inputPatchPhase] Patch phase to run for this derivation.
+  - [buildInputs] Additional package dependencies.
+  - [inputDependencies] Additional python package dependencies.
+  - [proto_meta] metadata about the protos used to generate the python (name, version, etc.).
+  */
+  package = {
+    pkgs,
+    suffix,
+    inputPatchPhase,
+    buildInputs,
+    inputDependencies,
+    proto_meta,
+  }:
+    pkgs.python3Packages.buildPythonPackage rec {
+      name = proto_meta.name + suffix;
+      version = proto_meta.version;
+      src = proto_meta.src;
 
-    buildDeps = [ pkgs.python3Packages.protobuf ] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
-    nativeBuildInputs = [ pkgs.protobuf pkgs.python3Packages.setuptools ] ++ buildDeps; # for import checking
-    propagatedBuildInputs = buildDeps;
-    doCheck = false;
-    pyproject = true;
+      buildDeps = [pkgs.python3Packages.protobuf] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
+      nativeBuildInputs = [pkgs.protobuf pkgs.python3Packages.setuptools] ++ buildDeps; # for import checking
+      propagatedBuildInputs = buildDeps;
+      doCheck = false;
+      pyproject = true;
 
-    dependencies = inputDependencies ++ [ "protobuf" ] ++ toPythonDependencies proto_meta.protoDeps;
-    py_project_toml = toPyProjectTOML { inherit name; inherit version; inherit dependencies; };
+      dependencies = inputDependencies ++ ["protobuf"] ++ toPythonDependencies proto_meta.protoDeps;
+      py_project_toml = toPyProjectTOML {
+        inherit name;
+        inherit version;
+        inherit dependencies;
+      };
 
-    prePatch = ''
-      mkdir -p src/${name}
-    '';
+      prePatch = ''
+        mkdir -p src/${name}
+      '';
 
-    patchPhase = inputPatchPhase;
+      patchPhase = inputPatchPhase;
 
-    /** For each dependency walk all the protos provided by that dependency and for each of those walk every python file generated by this derivation and patch the imports to point to the outer package "...proto_py" of the dependency*/
-    postPatch = ''
-      shopt -s globstar
-      declare -A deps=${escapeShellArg("(" + (concatMapStringsSep " " (dep: "[\"" +  dep.name + "\"]" + "=\"" + dep.src + "\"")  ((recursiveProtoDeps proto_meta.protoDeps) ++ [ proto_meta ])) + ")")}
-      # Prefix all the imports with the container package
-      echo "Patching proto imports"
-      for dep in "''${!deps[@]}"; do
-          for proto in `find "''${deps[''${dep}]}" -type f -name "*.proto"`; do
-            path=$(realpath --relative-to="''${deps[''${dep}]}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././;s/\.[^.]*$//')
-            for py in `find "./src/${proto_meta.name + suffix}" -type f -name "*_pb2*.py"`; do
-              sed -i "s/from\ $path\ import/from\ ''${dep}_proto_py.$path\ import/g" $py
+      /*
+      * For each dependency walk all the protos provided by that dependency and for each of those walk every python file generated by this derivation and patch the imports to point to the outer package "...proto_py" of the dependency
+      */
+      postPatch = ''
+        shopt -s globstar
+        declare -A deps=${escapeShellArg ("(" + (concatMapStringsSep " " (dep: "[\"" + dep.name + "\"]" + "=\"" + dep.src + "\"") ((recursiveProtoDeps proto_meta.protoDeps) ++ [proto_meta])) + ")")}
+        # Prefix all the imports with the container package
+        echo "Patching proto imports"
+        for dep in "''${!deps[@]}"; do
+            for proto in `find "''${deps[''${dep}]}" -type f -name "*.proto"`; do
+              path=$(realpath --relative-to="''${deps[''${dep}]}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././;s/\.[^.]*$//')
+              for py in `find "./src/${proto_meta.name + suffix}" -type f -name "*_pb2*.py"`; do
+                sed -i "s/from\ $path\ import/from\ ''${dep}_proto_py.$path\ import/g" $py
+            done
           done
         done
-      done
 
-      cat > pyproject.toml << EOF ${py_project_toml}
-      EOF
-      cat > setup.py << EOF
-      from setuptools import setup
-      setup()
-      EOF
-    '';
-  };
+        cat > pyproject.toml << EOF ${py_project_toml}
+        EOF
+        cat > setup.py << EOF
+        from setuptools import setup
+        setup()
+        EOF
+      '';
+    };
 
-  /**
-    Protobuf inputs to the `package` function.
-    Pulls the meta data from the `__proto_internal_meta_package` and provides a patch phase to run protoc and patch the generated files.
+  /*
+  *
+  Protobuf inputs to the `package` function.
+  Pulls the meta data from the `__proto_internal_meta_package` and provides a patch phase to run protoc and patch the generated files.
 
-    # Type
+  # Type
 
-    ```
-    protobuf :: { pkgs :: AttrSet, __proto_internal_meta_package :: Derivation } -> (AttrSet -> Derivation)
-    ```
+  ```
+  protobuf :: { pkgs :: AttrSet, __proto_internal_meta_package :: Derivation } -> (AttrSet -> Derivation)
+  ```
 
-    - [pkgs] Package set that this derivation will be built into.
-    - [__proto_internal_meta_package] The derivation holding the metadata and source location for the protos (dependencies etc.)
-   */
-  protobuf = { pkgs, __proto_internal_meta_package }: package rec {
-    inherit pkgs;
-    proto_meta = (loadMeta __proto_internal_meta_package);
-    suffix = "_proto_py";
-    /** Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports */
-    inputPatchPhase =
-      ''
+  - [pkgs] Package set that this derivation will be built into.
+  - [__proto_internal_meta_package] The derivation holding the metadata and source location for the protos (dependencies etc.)
+  */
+  protobuf = {
+    pkgs,
+    __proto_internal_meta_package,
+  }:
+    package rec {
+      inherit pkgs;
+      proto_meta = loadMeta __proto_internal_meta_package;
+      suffix = "_proto_py";
+      /*
+      * Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
+      */
+      inputPatchPhase = ''
         runHook prePatch
         shopt -s globstar
         for proto in `find "${proto_meta.src}" -type f -name "*.proto"`; do
-          protoc ${(toProtocInclude ((recursiveProtoDeps proto_meta.protoDeps) ++ [ proto_meta ]))} --python_out=src/${proto_meta.name + suffix} $proto
+          protoc ${(toProtocInclude ((recursiveProtoDeps proto_meta.protoDeps) ++ [proto_meta]))} --python_out=src/${proto_meta.name + suffix} $proto
           echo  "from .$(realpath --relative-to="${proto_meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2 import *" >> src/${proto_meta.name + suffix}/__init__.py
         done
         runHook postPatch
       '';
-    inputDependencies = [ ];
-    buildInputs = [ ];
-  };
+      inputDependencies = [];
+      buildInputs = [];
+    };
 
-  /**
-    GRPC inputs to the `package` function.
-    Pulls the meta data from the `__proto_internal_meta_package` and provides a patch phase to run grpc_tools.protoc and patch the generated files.
+  /*
+  *
+  GRPC inputs to the `package` function.
+  Pulls the meta data from the `__proto_internal_meta_package` and provides a patch phase to run grpc_tools.protoc and patch the generated files.
 
-    # Type
+  # Type
 
-    ```
-    protobuf :: { pkgs :: AttrSet, __proto_internal_meta_package :: Derivation } -> (AttrSet -> Derivation)
-    ```
+  ```
+  protobuf :: { pkgs :: AttrSet, __proto_internal_meta_package :: Derivation } -> (AttrSet -> Derivation)
+  ```
 
-    - [pkgs] Package set that this derivation will be built into.
-    - [__proto_internal_meta_package] The derivation holding the metadata and source location for the protos (dependencies etc.)
-   */
-  grpc = { pkgs, __proto_internal_meta_package }: package rec {
-    inherit pkgs;
-    proto_meta = (loadMeta __proto_internal_meta_package);
-    suffix = "_grpc_py";
-    buildInputs = [ pkgs.python3Packages.grpcio pkgs.python3Packages.grpcio-tools pkgs.grpc pkgs.openssl pkgs.zlib ] ++ (toBuildDepsPy [ proto_meta ] pkgs);
-    inputDependencies = [ "grpcio" ];
-    /** Generate each proto file using grpcio and add the generated code to the __init__.py file to allow for top level imports */
-    inputPatchPhase =
-      ''
+  - [pkgs] Package set that this derivation will be built into.
+  - [__proto_internal_meta_package] The derivation holding the metadata and source location for the protos (dependencies etc.)
+  */
+  grpc = {
+    pkgs,
+    __proto_internal_meta_package,
+  }:
+    package rec {
+      inherit pkgs;
+      proto_meta = loadMeta __proto_internal_meta_package;
+      suffix = "_grpc_py";
+      buildInputs = [pkgs.python3Packages.grpcio pkgs.python3Packages.grpcio-tools pkgs.grpc pkgs.openssl pkgs.zlib] ++ (toBuildDepsPy [proto_meta] pkgs);
+      inputDependencies = ["grpcio"];
+      /*
+      * Generate each proto file using grpcio and add the generated code to the __init__.py file to allow for top level imports
+      */
+      inputPatchPhase = ''
         runHook prePatch
         shopt -s globstar
         for proto in `find "${proto_meta.src}" -type f -name "*.proto"`; do
-          python -m grpc_tools.protoc ${ (toProtocInclude ((recursiveProtoDeps proto_meta.protoDeps) ++ [ proto_meta ]))} --grpc_python_out=src/${proto_meta.name + suffix} $proto
+          python -m grpc_tools.protoc ${(toProtocInclude ((recursiveProtoDeps proto_meta.protoDeps) ++ [proto_meta]))} --grpc_python_out=src/${proto_meta.name + suffix} $proto
           echo  "from .$(realpath --relative-to="${proto_meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2_grpc import *" >> src/${proto_meta.name + suffix}/__init__.py
         done
         runHook postPatch
       '';
-  };
+    };
 }

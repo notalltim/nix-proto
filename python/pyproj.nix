@@ -1,5 +1,9 @@
-{ lib }:
-{ name, version, dependencies }: lib.serde.toTOML {
+{lib}: {
+  name,
+  version,
+  dependencies,
+}:
+lib.serde.toTOML {
   project = {
     name = name;
     version = version;
@@ -7,7 +11,7 @@
     requires-python = ">=3.8";
   };
   build-system = {
-    requires = [ "setuptools" ];
+    requires = ["setuptools"];
     build-backend = "setuptools.build_meta";
   };
 }
