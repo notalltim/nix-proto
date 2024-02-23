@@ -3,7 +3,16 @@ cmake_minimum_required(VERSION 3.12)
 project(${CPP_NAME} VERSION "${CPP_VERISON}")
 
 find_package(Protobuf REQUIRED)
-
+if(DEFINED Protobuf_PROTOC_EXECUTABLE)
+  message("Overriding protoc to ${Protobuf_PROTOC_EXECUTABLE}")
+  set_target_properties(
+    protobuf::protoc
+    PROPERTIES IMPORTED_LOCATION_RELWITHDEBINFO ${Protobuf_PROTOC_EXECUTABLE}
+               IMPORTED_LOCATION_DEBUG ${Protobuf_PROTOC_EXECUTABLE}
+               IMPORTED_LOCATION_NOCONFIG ${Protobuf_PROTOC_EXECUTABLE}
+               IMPORTED_LOCATION_RELEASE ${Protobuf_PROTOC_EXECUTABLE}
+               IMPORTED_LOCATION_MINSIZEREL ${Protobuf_PROTOC_EXECUTABLE})
+endif()
 include(util.cmake)
 
 set_depenencies("${CPP_DEPS}")
@@ -21,17 +30,16 @@ target_include_directories(${OBJECT_LIBRARY}
 
 target_link_libraries(${OBJECT_LIBRARY} PUBLIC protobuf::libprotobuf)
 
-protobuf_generate(TARGET ${OBJECT_LIBRARY} 
-                  IMPORT_DIRS ${PROTO_DEPS}
+protobuf_generate(TARGET ${OBJECT_LIBRARY} IMPORT_DIRS ${PROTO_DEPS}
                   PROTOC_OUT_DIR "${PROTO_BINARY_DIR}")
 
 set(LIBRARY ${PROJECT_NAME})
 
-add_library(${LIBRARY}  $<TARGET_OBJECTS:${OBJECT_LIBRARY}>)
+add_library(${LIBRARY} $<TARGET_OBJECTS:${OBJECT_LIBRARY}>)
 
 target_include_directories(
   ${LIBRARY} PUBLIC $<BUILD_INTERFACE:${PROTO_BINARY_DIR}>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+                    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 target_link_libraries(${LIBRARY} PUBLIC ${DEPS} protobuf::libprotobuf)
 
