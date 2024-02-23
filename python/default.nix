@@ -80,6 +80,7 @@
     suffix,
     inputPatchPhase,
     buildInputs,
+    nativeInputs ? [],
     inputDependencies,
     proto_meta,
   }:
@@ -87,18 +88,17 @@
       name = proto_meta.name + suffix;
       version = proto_meta.version;
       src = proto_meta.src;
-
-      buildDeps = [pkgs.python3Packages.protobuf] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
-      nativeBuildInputs = [pkgs.protobuf pkgs.python3Packages.setuptools] ++ buildDeps; # for import checking
-      propagatedBuildInputs = buildDeps;
       doCheck = false;
       pyproject = true;
 
-      dependencies = inputDependencies ++ ["protobuf"] ++ toPythonDependencies proto_meta.protoDeps;
+      dependencies = [pkgs.python3Packages.protobuf] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
+      nativeBuildInputs = [pkgs.buildPackages.protobuf pkgs.buildPackages.python3Packages.setuptools] ++ nativeInputs ++ dependencies; # for import checking
+      propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
+
       py_project_toml = toPyProjectTOML {
         inherit name;
         inherit version;
-        inherit dependencies;
+        dependencies = inputDependencies ++ ["protobuf"] ++ toPythonDependencies proto_meta.protoDeps;
       };
 
       prePatch = ''
@@ -194,6 +194,7 @@
       proto_meta = loadMeta __proto_internal_meta_package;
       suffix = "_grpc_py";
       buildInputs = [pkgs.python3Packages.grpcio pkgs.python3Packages.grpcio-tools pkgs.grpc pkgs.openssl pkgs.zlib] ++ (toBuildDepsPy [proto_meta] pkgs);
+      nativeInputs = [pkgs.buildPackages.python3Packages.grpcio-tools];
       inputDependencies = ["grpcio"];
       /*
       * Generate each proto file using grpcio and add the generated code to the __init__.py file to allow for top level imports
