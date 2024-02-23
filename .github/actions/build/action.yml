@@ -17,22 +17,38 @@ inputs:
     description: "User style legacy or main"
     required: true
     default: 'main'
+  architecture:
+    description: "Architecture to build with"
+    required: false
+    default: 'x86-64'
 runs:
   using: "composite"
   steps:
-      - uses: cachix/install-nix-action@v23
-      - uses: actions/checkout@v4
-        with:
-          repository: notalltim/test-apis
-          ref: refs/heads/${{ inputs.style }}
-          path: test-repo
-      - run: |
-          nix build .#tester_${{ inputs.generator }} \
-          --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
-          --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
-          --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
-        shell: bash
-        working-directory: test-repo
-      - uses: actions/checkout@v4
-        with:
-          path: action
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - uses: actions/checkout@v4
+      with:
+        repository: notalltim/test-apis
+        ref: refs/heads/${{ inputs.style }}
+        path: test-repo
+    - name: Native build
+      if: ${{ inputs.architecture  == 'x86-64'}}
+      run: |
+        nix build .#tester_${{ inputs.generator }} \
+        --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
+        --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
+      shell: bash
+      working-directory: test-repo
+    - name: Cross build
+      if: ${{ inputs.architecture != 'x86-64' }}
+      run: |
+        nix build .#pkgsCross.${{ inputs.architecture }}.tester_${{ inputs.generator }} \
+        --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
+        --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
+      shell: bash
+      working-directory: test-repo
+    - uses: actions/checkout@v4
+      with:
+        path: action

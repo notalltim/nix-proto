@@ -5,27 +5,31 @@ on:
       branch:
         required: true
         type: string
+      architecture:
+        type: string
+        required: false
+        default: "x86-64"
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        architecture: [x86_64]
         package: [tester]
         type: [grpc]
         language: [cpp, py]
         style: [legacy-meta, main]
     steps:
-        - name: Get branch names
-          id: branch-name
-          uses: tj-actions/branch-names@v7
-        - uses: actions/checkout@v4
-          with:
-            path: action
-            ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
-        - uses: ./action/.github/actions/build
-          with:
-            nixpkgs: ${{ inputs.branch }}
-            style: ${{ matrix.style }}
-            generator: ${{ matrix.type }}_${{ matrix.language }}
-            branch: ${{ steps.branch-name.outputs.current_branch }}
+      - name: Get branch names
+        id: branch-name
+        uses: tj-actions/branch-names@v7
+      - uses: actions/checkout@v4
+        with:
+          path: action
+          ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
+      - uses: ./action/.github/actions/build
+        with:
+          nixpkgs: ${{ inputs.branch }}
+          style: ${{ matrix.style }}
+          generator: ${{ matrix.type }}_${{ matrix.language }}
+          branch: ${{ steps.branch-name.outputs.current_branch }}
+          architecture: ${{ inputs.architecture }}

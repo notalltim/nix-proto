@@ -10,7 +10,16 @@ jobs:
         branches: [release-22.05, release-22.11, release-23.05, release-23.11, nixpkgs-unstable, master]
     uses: ./.github/workflows/build-multiple.yml
     with:
-        branch: ${{ matrix.branches }}
+      branch: ${{ matrix.branches }}
+  build-supported-cross:
+    strategy:
+      matrix:
+        branches: [release-23.11]
+        architectures: [armv7l-hf-multiplatform, aarch64-multiplatform]
+    uses: ./.github/workflows/build-multiple.yml
+    with:
+      branch: ${{ matrix.branches }}
+      architecture: ${{ matrix.architectures }}
   it-all-good:
     runs-on: ubuntu-latest
     if: always()
