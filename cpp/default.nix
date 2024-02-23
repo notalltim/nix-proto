@@ -113,7 +113,7 @@
   # Type
 
   ```
-  protobuf :: {pkgs :: AttrSet, __proto_internal_meta_package :: Derivation } -> Derivation
+  protobuf :: {pkgs :: AttrSet, __proto_internal_meta_package :: Derivation } -> Deriation
   ```
 
   - [pkgs] Package set that this derivation will be built into.
@@ -121,16 +121,19 @@
   */
   protobuf = {
     pkgs,
+    protobuf,
+    cmake,
+    stdenv,
     __proto_internal_meta_package,
   }:
-    pkgs.stdenv.mkDerivation rec {
+    stdenv.mkDerivation rec {
       meta = loadMeta __proto_internal_meta_package;
       name = meta.name + "_proto_cpp";
       src = meta.src;
       version = meta.version;
 
-      propagatedBuildInputs = [pkgs.protobuf] ++ (toBuildDepsCpp meta.protoDeps pkgs);
-      nativeBuildInputs = [pkgs.cmake pkgs.protobuf];
+      propagatedBuildInputs = [protobuf] ++ (toBuildDepsCpp meta.protoDeps pkgs);
+      nativeBuildInputs = [cmake] ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) [pkgs.buildPackages.protobuf];
 
       cmakeFlags =
         [
@@ -142,7 +145,13 @@
         ]
         ++ optionals (!pkgs.stdenv.hostPlatform.isStatic) [
           "-DBUILD_SHARED_LIBS=ON" # build shared libs by default
-        ];
+        ]
+        ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) (let
+          protobufVersion =
+            if (lib.versionOlder protobuf.version "5")
+            then "protobuf${lib.versions.major protobuf.version}_${lib.versions.minor protobuf.version}"
+            else "protobuf_${lib.versions.major protobuf.version}";
+        in ["-DProtobuf_PROTOC_EXECUTABLE=${pkgs.buildPackages."${protobufVersion}"}/bin/protoc"]);
 
       cmakeFile = pkgs.writeText "CMakeLists.txt" protobufCmake;
       cmakeFileConfig = pkgs.writeText "${name}Config.cmake.in" protobufCmakeConfig;
@@ -160,7 +169,7 @@
       '';
 
       outputs = ["out" "dev"];
-      separateDebugInfo = true;
+      separateDebugInfo = !(lib.versionOlder protobuf.version "5");
     };
 
   /*
@@ -178,6 +187,11 @@
   */
   grpc = {
     pkgs,
+    cmake,
+    protobuf,
+    pkg-config,
+    grpc,
+    openssl,
     __proto_internal_meta_package,
   }:
     pkgs.stdenv.mkDerivation rec {
@@ -186,9 +200,9 @@
       src = meta.src;
       version = meta.version;
 
-      propagatedBuildInputs = [pkgs.protobuf pkgs.grpc pkgs.openssl] ++ (toBuildDepsCpp (meta.protoDeps ++ [meta]) pkgs);
-      nativeBuildInputs = [pkgs.cmake pkgs.protobuf];
-      propagatedNativeBuildInputs = [pkgs.pkg-config]; # Needed because some cmake dependencies use pkg-config
+      propagatedBuildInputs = [protobuf grpc openssl] ++ (toBuildDepsCpp (meta.protoDeps ++ [meta]) pkgs);
+      nativeBuildInputs = [cmake] ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) [protobuf grpc];
+      propagatedNativeBuildInputs = [pkg-config]; # Needed because some cmake dependencies use pkg-config
 
       cmakeFlags =
         [
@@ -198,9 +212,16 @@
           "-DPROTOS=${toProtoPathsCMake meta}"
           "-DCPP_DEPS=${toCMakeDependencies (meta.protoDeps ++ [meta])}"
         ]
-        ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) [
+        ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) (let
+          protobufVersion =
+            if (lib.versionOlder protobuf.version "5")
+            then "protobuf${lib.versions.major protobuf.version}_${lib.versions.minor protobuf.version}"
+            else "protobuf_${lib.versions.major protobuf.version}";
+        in [
+          "-DProtobuf_PROTOC_EXECUTABLE=${pkgs.buildPackages."${protobufVersion}"}/bin/protoc"
+          "-DgRPC_PLUGIN_EXECUTABLE=${pkgs.buildPackages.grpc}/bin/grpc_cpp_plugin"
           "-DCMAKE_CROSSCOMPILING=OFF" # Needed due to GRPC relying on the CMAKE_CROSSCOMPILING for adding the plugin targets
-        ]
+        ])
         ++ optionals (!pkgs.stdenv.hostPlatform.isStatic) [
           "-DBUILD_SHARED_LIBS=ON" # build shared libs by default
         ];
@@ -221,6 +242,6 @@
       '';
 
       outputs = ["out" "dev"];
-      separateDebugInfo = true;
+      separateDebugInfo = !(lib.versionOlder protobuf.version "5");
     };
 }
