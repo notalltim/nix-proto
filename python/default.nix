@@ -93,6 +93,7 @@
 
       dependencies = [pkgs.python3Packages.protobuf] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
       nativeBuildInputs = [pkgs.buildPackages.protobuf pkgs.buildPackages.python3Packages.setuptools] ++ nativeInputs ++ dependencies; # for import checking
+      propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
 
       py_project_toml = toPyProjectTOML {
         inherit name;
