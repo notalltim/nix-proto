@@ -212,8 +212,8 @@
     doubleCall = !((functionArgs input) ? stdenvNoCC); # Check if the user passed a function or if this is the internal derivation
   in
     if doubleCall
-    then prev: (prev.callPackage (prev.callPackage input {}) {})
-    else prev: (prev.callPackage input {});
+    then final: (final.callPackage (final.callPackage input {}) {})
+    else final: (final.callPackage input {});
 
   /*
   *
@@ -256,7 +256,7 @@
     package = evaluateProtoDerivation drv;
     derivations = generateDerivations {inherit name;};
   in
-    final: prev:
-      (mapAttrs' (key: value: nameValuePair (removeSuffix "_drv" key) (prev.callPackage value {__proto_internal_meta_package = package prev;})) derivations)
-      // rec {${name} = package prev;};
+    final: _:
+      (mapAttrs' (key: value: nameValuePair (removeSuffix "_drv" key) (final.callPackage value {__proto_internal_meta_package = package final;})) derivations)
+      // rec {${name} = package final;};
 }
