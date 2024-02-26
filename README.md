@@ -1,8 +1,16 @@
 # nix-proto
 
+The nix-proto library provides automatic overlay generation and dependency management of code generated from proto files.
+
+## Supported Releases
+
 ![release-22.05](https://github.com/notalltim/nix-proto/actions/workflows/release-22.05.yml/badge.svg) ![release-22.11](https://github.com/notalltim/nix-proto/actions/workflows/release-22.11.yml/badge.svg) ![release-23.05](https://github.com/notalltim/nix-proto/actions/workflows/release-23.05.yml/badge.svg) ![release-23.11](https://github.com/notalltim/nix-proto/actions/workflows/release-23.11.yml/badge.svg) ![unstable](https://github.com/notalltim/nix-proto/actions/workflows/unstable.yml/badge.svg) ![master](https://github.com/notalltim/nix-proto/actions/workflows/master.yml/badge.svg)
 
-The nix-proto library provides automatic overlay generation and dependency management of code generated from proto files.
+## Supported Cross Compile
+
+**NOTE** only tested with `x86_64-linux` as the `buildPlatform`
+
+![aarch64-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/aarch64-multiplatform/badge.svg) ![armv7-hf-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/armv7-hf-multiplatform/badge.svg)
 
 ## Features
 
@@ -34,7 +42,7 @@ There are a few utilities provides to help using the `mkProtoDerivation` . They 
 ## Usage
 
 The interface is similar to `mkDerivation` with a few tweaks. The user creates derivations in the context of the `generateOverlays'` function.
-**NOTE** there is a limitation that requires the name given to the attribute set to be the same as the name given to the derivation eg. `base_api == base_api`.
+**NOTE** there is a limitation that requires the name given to the attribute set to be the same as the name given to the derivation e.g. `base_api == base_api`.
 
 ### Generation
 
@@ -59,9 +67,9 @@ The interface is similar to `mkDerivation` with a few tweaks. The user creates d
 
 ### Overlay
 
-The structure of the returned overlay is an attribute set of overlays with names given in the initial set appended with "_overlay".
+The structure of the returned overlay is an attribute set of overlays with names given in the initial set appended with "\_overlay".
 
-``` nix
+```nix
 {
   overlays = {
     base_api_overlay =  final: prev: {...};
@@ -72,7 +80,7 @@ The structure of the returned overlay is an attribute set of overlays with names
 
 ### Flake Support
 
-Using this library with flakes is simple just take it as an input. A simple example is shown below. Examples can be found  [upstream-apis](https://github.com/notalltim/upstream-apis) and [test-apis](https://github.com/notalltim/test-apis).
+Using this library with flakes is simple just take it as an input. A simple example is shown below. Examples can be found [upstream-apis](https://github.com/notalltim/upstream-apis) and [test-apis](https://github.com/notalltim/test-apis).
 
 ```nix
 {
