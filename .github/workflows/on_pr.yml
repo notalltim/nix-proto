@@ -25,6 +25,7 @@ jobs:
     if: always()
     needs:
       - build-supported-releases
+      - build-supported-cross
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
