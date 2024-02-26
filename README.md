@@ -10,7 +10,7 @@ The nix-proto library provides automatic overlay generation and dependency manag
 
 **NOTE** only tested with `x86_64-linux` as the `buildPlatform`
 
-![aarch64-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/aarch64-multiplatform/badge.svg) ![armv7-hf-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/armv7-hf-multiplatform/badge.svg)
+![aarch64-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/aarch64-multiplatform.yml/badge.svg) ![armv7-hf-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/armv7-hf-multiplatform.yml/badge.svg)
 
 ## Features
 
@@ -33,7 +33,7 @@ Code generation dependencies are managed on a per language basis i.e. if there a
 
 ### Utilities
 
-There are a few utilities provides to help using the `mkProtoDerivation` . They can be found under `nix-proto.lib`
+There are a few utilities provides to help with the `mkProtoDerivation` function. They can be found under `nix-proto.lib`
 
 - `overlayToList` - convert the overlay returned from the `generateOverlays'` call to a list
 - `srcFromNamespace` - given a folder structure for a proto filter the given root to allow for multiple apis to be co-located
