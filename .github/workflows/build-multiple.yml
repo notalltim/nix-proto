@@ -19,8 +19,7 @@ jobs:
     strategy:
       matrix:
         package: [tester]
-        type: [grpc]
-        language: [cpp, py, proto_descriptor]
+        language: [grpc_cpp, grcp_py, proto_descriptor]
     steps:
       - name: Get branch names
         id: branch-name
@@ -34,7 +33,7 @@ jobs:
         with:
           nixpkgs: ${{ inputs.branch }}
           style: main
-          generator: ${{ matrix.type }}_${{ matrix.language }}
+          generator: ${{ matrix.language }}
           branch: ${{ steps.branch-name.outputs.current_branch }}
           architecture: ${{ inputs.architecture }}
       - name: Build Legacy
@@ -43,6 +42,6 @@ jobs:
         with:
           nixpkgs: ${{ inputs.branch }}
           style: legacy-meta
-          generator: ${{ matrix.type }}_${{ matrix.language }}
+          generator: ${{ matrix.language }}
           branch: ${{ steps.branch-name.outputs.current_branch }}
           architecture: ${{ inputs.architecture }}
