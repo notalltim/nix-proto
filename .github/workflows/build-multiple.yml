@@ -21,7 +21,6 @@ jobs:
         package: [tester]
         type: [grpc]
         language: [cpp, py, proto_descriptor]
-        style: [legacy-meta, main]
     steps:
       - name: Get branch names
         id: branch-name
