@@ -1,9 +1,8 @@
 name: "22.11 "
 on:
   workflow_dispatch:
-
 jobs:
   build-releases:
     uses: ./.github/workflows/build-multiple.yml
     with:
-        branch: release-22.11
+      branch: release-22.11

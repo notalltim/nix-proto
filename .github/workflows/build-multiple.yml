@@ -9,6 +9,10 @@ on:
         type: string
         required: false
         default: "x86-64"
+      build_legacy:
+        type: boolean
+        required: false
+        default: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,7 +20,7 @@ jobs:
       matrix:
         package: [tester]
         type: [grpc]
-        language: [cpp, py]
+        language: [cpp, py, proto_descriptor]
         style: [legacy-meta, main]
     steps:
       - name: Get branch names
@@ -26,10 +30,20 @@ jobs:
         with:
           path: action
           ref: refs/heads/${{ steps.branch-name.outputs.current_branch }}
-      - uses: ./action/.github/actions/build
+      - name: Build
+        uses: ./action/.github/actions/build
         with:
           nixpkgs: ${{ inputs.branch }}
-          style: ${{ matrix.style }}
+          style: main
+          generator: ${{ matrix.type }}_${{ matrix.language }}
+          branch: ${{ steps.branch-name.outputs.current_branch }}
+          architecture: ${{ inputs.architecture }}
+      - name: Build Legacy
+        if: build_legacy == true
+        uses: ./action/.github/actions/build
+        with:
+          nixpkgs: ${{ inputs.branch }}
+          style: legacy-meta
           generator: ${{ matrix.type }}_${{ matrix.language }}
           branch: ${{ steps.branch-name.outputs.current_branch }}
           architecture: ${{ inputs.architecture }}
