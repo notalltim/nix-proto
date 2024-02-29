@@ -39,7 +39,7 @@ jobs:
           branch: ${{ steps.branch-name.outputs.current_branch }}
           architecture: ${{ inputs.architecture }}
       - name: Build Legacy
-        if: ${{ build_legacy }} == true
+        if: ${{ inputs.build_legacy }} == true
         uses: ./action/.github/actions/build
         with:
           nixpkgs: ${{ inputs.branch }}
