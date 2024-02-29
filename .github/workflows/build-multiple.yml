@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         package: [tester]
-        language: [grpc_cpp, grcp_py, proto_descriptor]
+        language: [grpc_cpp, grpc_py, proto_descriptor]
     steps:
       - name: Get branch names
         id: branch-name
