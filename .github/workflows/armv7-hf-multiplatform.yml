@@ -9,3 +9,4 @@ jobs:
     with:
       branch: release-23.11
       architecture: armv7l-hf-multiplatform
+      build_legacy: false

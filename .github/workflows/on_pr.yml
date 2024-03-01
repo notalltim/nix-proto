@@ -20,6 +20,7 @@ jobs:
     with:
       branch: ${{ matrix.branches }}
       architecture: ${{ matrix.architectures }}
+      build_legacy: false
   it-all-good:
     runs-on: ubuntu-latest
     if: always()

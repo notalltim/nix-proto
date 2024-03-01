@@ -154,6 +154,12 @@
   generateGRPCCpp = cppGenerators.grpc;
 
   /*
+  * Generate proto descriptors
+  */
+
+  generateDescriptor = ((import ./descriptor) {inherit lib;}).package;
+
+  /*
   *
   Create a set of derivation to evaluate with `generateOverlay'`
   # Example
@@ -179,6 +185,7 @@
     ${name + "_grpc_" + "py_drv"} = generateGRPCPython;
     ${name + "_proto_" + "cpp_drv"} = generateCpp;
     ${name + "_grpc_" + "cpp_drv"} = generateGRPCCpp;
+    ${name + "_proto_" + "descriptor_drv"} = generateDescriptor;
   };
 
   /*
