@@ -1,6 +1,6 @@
 {lib}: rec {
   inherit (lib.lists) forEach;
-  inherit (lib.strings) escapeShellArg concatMapStringsSep;
+  inherit (lib.strings) escapeShellArg concatMapStringsSep concatStringsSep;
   inherit (lib) recursiveProtoDeps toProtocInclude loadMeta;
 
   /*
@@ -54,7 +54,23 @@
 
   */
   toBuildDepsPy = deps: pkgs: forEach deps (dep: pkgs.${dep.name + "_proto_py"});
+  /*
+    *
+  Convert a set of attribute sets of metadata to a list of derivations looked up by name from the package set provided.
 
+    # Type
+
+    ```
+    toBuildDeps :: List -> List
+    ```
+
+    - [deps] List of attribute sets minimally containing the name of the base proto.
+    - [pkgs] List of attribute sets minimally containing the name of the base proto.
+
+    - [returns] List of derivations from the package set that the package depends on.
+
+  */
+  toBuildDepsDescriptor = deps: pkgs: forEach deps (dep: pkgs.${dep.name + "_proto_descriptor"});
   /*
   *
   Base function called by both grpc and protobuf generation targets to make a python package.
@@ -83,6 +99,7 @@
     nativeInputs ? [],
     inputDependencies,
     proto_meta,
+    ...
   }:
     pkgs.python3Packages.buildPythonPackage rec {
       name = proto_meta.name + suffix;
@@ -161,13 +178,29 @@
       /*
       * Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
       */
+      descriptor_py = pkgs.substituteAll {
+        src = ./descriptor.py;
+        package = proto_meta.name + suffix;
+      };
+
+      descriptors = pkgs.writeTextFile {
+        name = "descriptors.txt";
+        text = concatStringsSep "\n" (toBuildDepsDescriptor ((recursiveProtoDeps proto_meta.protoDeps) ++ [proto_meta]) pkgs);
+      };
+
       inputPatchPhase = ''
         runHook prePatch
         shopt -s globstar
+        cp ${descriptor_py} src/${proto_meta.name + suffix}/descriptor.py
+        cp ${descriptors}  src/${proto_meta.name + suffix}/descriptors.txt
         for proto in `find "${proto_meta.src}" -type f -name "*.proto"`; do
-          protoc ${(toProtocInclude ((recursiveProtoDeps proto_meta.protoDeps) ++ [proto_meta]))} --python_out=src/${proto_meta.name + suffix} $proto
+          protoc ${(toProtocInclude ((recursiveProtoDeps proto_meta.protoDeps) ++ [proto_meta]))} \
+          --python_out=src/${proto_meta.name + suffix} \
+          --pyi_out=src/${proto_meta.name + suffix} \
+          $proto
           echo  "from .$(realpath --relative-to="${proto_meta.src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2 import *" >> src/${proto_meta.name + suffix}/__init__.py
         done
+        echo "from .descriptor import file_descriptor_set as ${proto_meta.name}_descriptors" >> src/${proto_meta.name + suffix}/__init__.py
         runHook postPatch
       '';
       inputDependencies = [];

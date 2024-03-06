@@ -14,4 +14,8 @@ lib.serde.toTOML {
     requires = ["setuptools"];
     build-backend = "setuptools.build_meta";
   };
+  tool.setuptools = {
+    include-package-data = true;
+    package-data."*" = ["*.pyi" "*.txt"];
+  };
 }
