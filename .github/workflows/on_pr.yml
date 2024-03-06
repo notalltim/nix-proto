@@ -7,7 +7,7 @@ jobs:
   build-supported-releases:
     strategy:
       matrix:
-        branches: [release-22.05, release-22.11, release-23.05, release-23.11, nixpkgs-unstable, master]
+        branches: [release-22.11, release-23.05, release-23.11, nixpkgs-unstable, master]
     uses: ./.github/workflows/build-multiple.yml
     with:
       branch: ${{ matrix.branches }}
