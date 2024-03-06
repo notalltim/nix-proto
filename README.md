@@ -4,7 +4,7 @@ The nix-proto library provides automatic overlay generation and dependency manag
 
 ## Supported Releases
 
-![release-22.05](https://github.com/notalltim/nix-proto/actions/workflows/release-22.05.yml/badge.svg) ![release-22.11](https://github.com/notalltim/nix-proto/actions/workflows/release-22.11.yml/badge.svg) ![release-23.05](https://github.com/notalltim/nix-proto/actions/workflows/release-23.05.yml/badge.svg) ![release-23.11](https://github.com/notalltim/nix-proto/actions/workflows/release-23.11.yml/badge.svg) ![unstable](https://github.com/notalltim/nix-proto/actions/workflows/unstable.yml/badge.svg) ![master](https://github.com/notalltim/nix-proto/actions/workflows/master.yml/badge.svg)
+![release-22.11](https://github.com/notalltim/nix-proto/actions/workflows/release-22.11.yml/badge.svg) ![release-23.05](https://github.com/notalltim/nix-proto/actions/workflows/release-23.05.yml/badge.svg) ![release-23.11](https://github.com/notalltim/nix-proto/actions/workflows/release-23.11.yml/badge.svg) ![unstable](https://github.com/notalltim/nix-proto/actions/workflows/unstable.yml/badge.svg) ![master](https://github.com/notalltim/nix-proto/actions/workflows/master.yml/badge.svg)
 
 ## Supported Cross Compile
 
