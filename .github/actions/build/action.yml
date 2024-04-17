@@ -35,6 +35,7 @@ runs:
       if: ${{ inputs.architecture  == 'x86-64'}}
       run: |
         nix build .#tester_${{ inputs.generator }} \
+        --no-update-lock-file \
         --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
         --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
         --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
@@ -44,6 +45,7 @@ runs:
       if: ${{ inputs.architecture != 'x86-64' }}
       run: |
         nix build .#pkgsCross.${{ inputs.architecture }}.tester_${{ inputs.generator }} \
+        --no-update-lock-file \
         --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
         --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
         --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
