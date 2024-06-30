@@ -1,4 +1,4 @@
-name: "22.11 "
+name: "24.05 "
 on:
   schedule:
     - cron: '12 6 * * *'
