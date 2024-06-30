@@ -138,6 +138,8 @@
         };
       in
         meta;
+
+    nixProtoWarn = message: any: builtins.trace ("[1;31mnix-proto: " + message + "[0m") any;
   };
 
   /*
@@ -217,7 +219,7 @@
 
     [overlay_set]: attribute set of overlays.
     */
-    overlayToList = overlay_set: mapAttrsToList (name: overlay: overlay) overlay_set;
+    overlayToList = overlay_set: mapAttrsToList (_: overlay: overlay) overlay_set;
   };
 in {
   inherit common utilities;

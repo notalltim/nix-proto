@@ -10,7 +10,7 @@
   inherit (internal_lib) utilities;
 
   # Internal lib used by code generation and nix generation
-  lib = std // nix_lib // internal_lib.common;
+  lib = std // nix_lib // internal_lib.common // internal_lib.utilities;
 
   # Generation functions
   generation = import ./generation.nix {inherit lib;};

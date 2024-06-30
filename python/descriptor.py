@@ -9,6 +9,7 @@ from google.protobuf.descriptor_pb2 import (FileDescriptorProto,
 
 @cache
 def file_descriptor_set() -> List[FileDescriptorProto]:
+    """Get List of protobuf file descriptors for the @package@ and dependencies"""
     file_descriptors = []
     with files("@package@").joinpath("descriptors.txt").open("r") as f:
         for line in f:
