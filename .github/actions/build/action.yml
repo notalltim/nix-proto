@@ -13,10 +13,6 @@ inputs:
     description: "Which generator to build with"
     required: true
     default: 'grpc_cpp'
-  style:
-    description: "User style legacy or main"
-    required: true
-    default: 'main'
   architecture:
     description: "Architecture to build with"
     required: false
@@ -29,7 +25,7 @@ runs:
     - uses: actions/checkout@v4
       with:
         repository: notalltim/test-apis
-        ref: refs/heads/${{ inputs.style }}
+        ref: refs/heads/main
         path: test-repo
     - name: Native build
       if: ${{ inputs.architecture  == 'x86-64'}}
@@ -37,7 +33,7 @@ runs:
         nix build .#tester_${{ inputs.generator }} \
         --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
         --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
-        --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
+        --override-input upstream-apis github:notalltim/upstream-apis
       shell: bash
       working-directory: test-repo
     - name: Cross build
@@ -46,7 +42,7 @@ runs:
         nix build .#pkgsCross.${{ inputs.architecture }}.tester_${{ inputs.generator }} \
         --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
         --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
-        --override-input upstream-apis github:notalltim/upstream-apis/${{ inputs.style }}
+        --override-input upstream-apis github:notalltim/upstream-apis
       shell: bash
       working-directory: test-repo
     - uses: actions/checkout@v4

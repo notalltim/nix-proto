@@ -9,10 +9,6 @@ on:
         type: string
         required: false
         default: "x86-64"
-      build_legacy:
-        type: boolean
-        required: false
-        default: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,16 +28,6 @@ jobs:
         uses: ./action/.github/actions/build
         with:
           nixpkgs: ${{ inputs.branch }}
-          style: main
-          generator: ${{ matrix.language }}
-          branch: ${{ steps.branch-name.outputs.current_branch }}
-          architecture: ${{ inputs.architecture }}
-      - name: Build Legacy
-        if: ${{ inputs.build_legacy }} == true
-        uses: ./action/.github/actions/build
-        with:
-          nixpkgs: ${{ inputs.branch }}
-          style: legacy-meta
           generator: ${{ matrix.language }}
           branch: ${{ steps.branch-name.outputs.current_branch }}
           architecture: ${{ inputs.architecture }}
