@@ -14,15 +14,7 @@
 
   # Generation functions
   generation = import ./generation.nix {inherit lib;};
-
-  #TODO(notalltim): remove this when downstream not using it
-  legacy = import ./legacy.nix {
-    inherit filter;
-    inherit lib;
-    generateDerivations = generation.generateDerivations;
-  };
 in {
-  inherit (legacy) generateMeta generateOverlay generateOverlays;
   inherit (generation) mkProtoDerivation generateOverlays';
   lib = {
     inherit (utilities) srcFromNamespace nameFromNamespace overlayToList;

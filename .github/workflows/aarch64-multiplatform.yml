@@ -7,6 +7,5 @@ jobs:
   build-releases:
     uses: ./.github/workflows/build-multiple.yml
     with:
-      branch: release-23.11
+      branch: release-24.05
       architecture: armv7l-hf-multiplatform
-      build_legacy: false

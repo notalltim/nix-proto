@@ -4,11 +4,11 @@ The nix-proto library provides automatic overlay generation and dependency manag
 
 ## Supported Releases
 
-![release-22.11](https://github.com/notalltim/nix-proto/actions/workflows/release-22.11.yml/badge.svg) ![release-23.05](https://github.com/notalltim/nix-proto/actions/workflows/release-23.05.yml/badge.svg) ![release-23.11](https://github.com/notalltim/nix-proto/actions/workflows/release-23.11.yml/badge.svg) ![unstable](https://github.com/notalltim/nix-proto/actions/workflows/unstable.yml/badge.svg) ![master](https://github.com/notalltim/nix-proto/actions/workflows/master.yml/badge.svg)
+![release-23.05](https://github.com/notalltim/nix-proto/actions/workflows/release-23.05.yml/badge.svg) ![release-23.11](https://github.com/notalltim/nix-proto/actions/workflows/release-23.11.yml/badge.svg) ![release-24.05](https://github.com/notalltim/nix-proto/actions/workflows/release-24.05.yml/badge.svg) ![unstable](https://github.com/notalltim/nix-proto/actions/workflows/unstable.yml/badge.svg) ![master](https://github.com/notalltim/nix-proto/actions/workflows/master.yml/badge.svg)
 
 ## Supported Cross Compile
 
-**NOTE** only tested with `x86_64-linux` as the `buildPlatform`
+**NOTE** only tested with `x86_64-linux` as the `buildPlatform` on `nixpkgs-24.05`
 
 ![aarch64-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/aarch64-multiplatform.yml/badge.svg) ![armv7-hf-multiplatform](https://github.com/notalltim/nix-proto/actions/workflows/armv7-hf-multiplatform.yml/badge.svg)
 
@@ -99,7 +99,7 @@ Using this library with flakes is simple just take it as an input. A simple exam
     in
       { inherit overlays; } // flake-utils.lib.eachDefaultSystem (system: rec
       {
-        legacyPackages = import nixpkgs { inherit system; overlays = nix-proto.lib.overlayToList overlays; };
+        legacyPackages = import nixpkgs { inherit system; overlays = [ overlays.default; ]; };
       });
 }
 ```
