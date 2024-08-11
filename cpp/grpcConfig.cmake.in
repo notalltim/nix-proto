@@ -3,7 +3,7 @@
 include(CMakeFindDependencyMacro)
 
 if(NOT TARGET protobuf::libprotobuf)
-  find_dependency(Protobuf)
+  find_dependency(protobuf)
 endif()
 
 if(NOT TARGET gRPC::grpc)
