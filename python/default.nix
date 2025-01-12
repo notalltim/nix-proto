@@ -106,29 +106,22 @@
   # Type
 
   ```
-  package :: { pkgs :: AttrSet, __proto_internal_meta_package :: AttrSet, python :: AttrSet, buildPackages :: AttrSet, substituteAll :: Function, writeTextFile :: Function } -> Derivation
+  package :: {  __proto_internal_meta_package :: AttrSet, ... } -> Derivation
   ```
 
-  - [pkgs] Package set that this derivation will be built into.
   - [__proto_internal_meta_package] The derivation holding the metadata and source location for the protos (dependencies etc.)
-  - [python] Python as input by callPackage this is important for pythonPackagesExtensions
-  - [buildPackages] Build platform package. Used to get deps that run at build time.
-  - [substituteAll] Function to create a file with substitutions.
-  - [writeTextFile] function to write a text file from a string.
   */
   protobuf = {
-    pkgs,
     __proto_internal_meta_package,
+    buildPythonPackage,
+    pkgs,
+    protobuf,
     python,
-    buildPackages,
+    setuptools,
     substituteAll,
     writeTextFile,
+    ...
   }: let
-    # Python Dependencies
-    inherit (python.pkgs) buildPythonPackage protobuf;
-    # Native build dependencies
-    inherit (buildPackages.${"python" + (concatStrings (splitVersion python.pythonVersion)) + "Packages"}) setuptools;
-
     # Package meta data
     protoMeta = loadMeta __proto_internal_meta_package;
     name = protoMeta.name + "_proto_py";
@@ -158,7 +151,7 @@
       inherit name version src dependencies postPatch;
       pyproject = true;
 
-      nativeBuildInputs = [buildPackages.protobuf setuptools]; # for import checking
+      nativeBuildInputs = [protobuf setuptools]; # for import checking
       propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
 
       prePatch = ''
@@ -195,26 +188,21 @@
   # Type
 
   ```
-  package :: { pkgs :: AttrSet, __proto_internal_meta_package :: AttrSet, python :: AttrSet, buildPackages :: AttrSet, substituteAll :: Function, writeTextFile :: Function } -> Derivation
+  package :: { __proto_internal_meta_package :: AttrSet, ... } -> Derivation
   ```
 
-  - [pkgs] Package set that this derivation will be built into.
   - [__proto_internal_meta_package] The derivation holding the metadata and source location for the protos (dependencies etc.)
-  - [python] Python as input by callPackage this is important for pythonPackagesExtensions
-  - [buildPackages] Build platform package. Used to get deps that run at build time.
   */
   grpc = {
-    pkgs,
     __proto_internal_meta_package,
+    buildPythonPackage,
+    grpcio,
+    grpcio-tools,
+    protobuf,
     python,
-    buildPackages,
+    setuptools,
+    ...
   }: let
-    # Native build tools pulled from the compatible python version
-    inherit (buildPackages.${"python" + (concatStrings (splitVersion python.pythonVersion)) + "Packages"}) grpcio-tools setuptools;
-
-    # Python dependencies pulled from the given python package
-    inherit (python.pkgs) buildPythonPackage protobuf grpcio;
-
     # Package information
     protoMeta = loadMeta __proto_internal_meta_package;
     name = protoMeta.name + "_grpc_py"; #TODO: Allow user to customize name
