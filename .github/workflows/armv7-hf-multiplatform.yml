@@ -1,11 +1,15 @@
 name: "armv7-hf-multiplatform "
 on:
   schedule:
-    - cron: '12 6 * * *'
+    - cron: '12 4 * * *'
   workflow_dispatch:
 jobs:
   build-releases:
+    strategy:
+      matrix:
+        releases: [release-24.05,release-24.11]
     uses: ./.github/workflows/build-multiple.yml
     with:
-      branch: release-24.05
+      nixpkgs: ${{ matrix.releases }}
       architecture: armv7l-hf-multiplatform
+      cache: "true"

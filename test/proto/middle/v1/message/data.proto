@@ -1,0 +1,8 @@
+syntax = "proto3";
+import "upstream/v1/message/data.proto";
+package middle.v1.message;
+
+message Data {
+  double data = 1;
+  upstream.v1.message.Data upstream_data = 2;
+}

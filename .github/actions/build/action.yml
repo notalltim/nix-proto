@@ -5,44 +5,72 @@ inputs:
     description: "Branch of repo to build"
     required: true
     default: 'main'
+  repo:
+    description: "Full name of repo formatted as OWNER/REPO"
+    required: false
+    default: "notalltim/nix-proto"
   nixpkgs:
     description: "Branch of nixpkgs to checkout"
     required: true
     default: 'release-23.11'
-  generator:
-    description: "Which generator to build with"
-    required: true
-    default: 'grpc_cpp'
   architecture:
     description: "Architecture to build with"
     required: false
     default: 'x86-64'
+  cache:
+    description: "Use nix magic cache"
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
     - uses: DeterminateSystems/nix-installer-action@main
-    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - name: Optional cache
+      if: ${{ inputs.cache == 'true' }}
+      uses: DeterminateSystems/magic-nix-cache-action@main
     - uses: actions/checkout@v4
+      with:
+        path: repo
+    - name: Native build
+      if: ${{ inputs.architecture  == 'x86-64'}}
+      run: |
+        nix build .#toplevel_proto_descriptor \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L
+        nix build .#toplevel_grpc_cpp \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L 
+        nix build .#toplevel_grpc_py \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L
+      shell: bash
+      working-directory: repo
+    - name: Cross build
+      if: ${{ inputs.architecture != 'x86-64' }}
+      run: |
+        nix build .#pkgsCross.${{ inputs.architecture }}.toplevel_proto_descriptor \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L
+        nix build .#pkgsCross.${{ inputs.architecture }}.toplevel_grpc_cpp \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L 
+        nix build .#pkgsCross.${{ inputs.architecture }}.toplevel_grpc_py \
+        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L
+      shell: bash
+      working-directory: repo
+    - uses: actions/checkout@v4
+      if: ${{ inputs.architecture  == 'x86-64'}}
       with:
         repository: notalltim/test-apis
         ref: refs/heads/main
         path: test-repo
-    - name: Native build
+    - name: Test API
       if: ${{ inputs.architecture  == 'x86-64'}}
       run: |
-        nix build .#tester_${{ inputs.generator }} \
-        --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
-        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
-        --override-input upstream-apis github:notalltim/upstream-apis
-      shell: bash
-      working-directory: test-repo
-    - name: Cross build
-      if: ${{ inputs.architecture != 'x86-64' }}
-      run: |
-        nix build .#pkgsCross.${{ inputs.architecture }}.tester_${{ inputs.generator }} \
-        --override-input nix-proto github:notalltim/nix-proto/${{ inputs.branch }} \
-        --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} \
-        --override-input upstream-apis github:notalltim/upstream-apis
+        nix build .#tester_proto_descriptor \
+        --override-input nix-proto github:${{ inputs.repo }}/${{ inputs.branch }} \
+        --override-input upstream-apis github:notalltim/upstream-apis -L
+        nix build .#tester_grpc_cpp \
+        --override-input nix-proto github:${{ inputs.repo }}/${{ inputs.branch }} \
+        --override-input upstream-apis github:notalltim/upstream-apis -L
+        nix build .#tester_grpc_py \
+        --override-input nix-proto github:${{ inputs.repo }}/${{ inputs.branch }} \
+        --override-input upstream-apis github:notalltim/upstream-apis -L
       shell: bash
       working-directory: test-repo
     - uses: actions/checkout@v4

@@ -1,26 +1,15 @@
-name: Build multiple
+name: Format check
 on:
   workflow_call:
     inputs:
-      nixpkgs:
-        required: true
-        type: string
       repo:
         required: false
         type: string
         default: "notalltim/nix-proto"
-      architecture:
-        type: string
-        required: false
-        default: "x86-64"
       branch:
         type: string
         required: false
         default: "main"
-      cache:
-        type: string
-        required: false
-        default: "false"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,11 +26,5 @@ jobs:
           sparse-checkout: .github
           path: action
           ref: refs/heads/main
-      - name: Build
-        uses: ./action/.github/actions/build
-        with:
-          nixpkgs: ${{ inputs.nixpkgs }}
-          branch: ${{ inputs.branch }}
-          architecture: ${{ inputs.architecture }}
-          repo: ${{ inputs.repo }}
-          cache: ${{ inputs.cache }}
+      - name: Format
+        uses: ./action/.github/actions/format

@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message Data {
+  double data = 1;
+}

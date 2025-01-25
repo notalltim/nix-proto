@@ -7,4 +7,5 @@ jobs:
   build-releases:
     uses: ./.github/workflows/build-multiple.yml
     with:
-      branch: nixpkgs-unstable
+      nixpkgs: nixpkgs-unstable
+      cache: "true"

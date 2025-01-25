@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package outer.inner.namespaced.test.v1;
+
+message NamedData {
+  double data = 1;
+}

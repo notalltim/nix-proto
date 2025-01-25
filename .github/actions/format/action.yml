@@ -1,0 +1,15 @@
+name: "Check format"
+description: "check the formatting of the nix code"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: actions/checkout@v4
+    - name: "Format"
+      run: nix flake check
+      shell: bash
+    - uses: actions/checkout@v4
+      with:
+        path: action
+
