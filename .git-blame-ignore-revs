@@ -1,2 +1,4 @@
 # Run Alejandra on the project
- 49f78fa91bfd58aaeb00c598901bc01e1f5c0ba1
+49f78fa91bfd58aaeb00c598901bc01e1f5c0ba1
+# Run nixfmt (RFC style), protolint, and yamlfmt on whole repo
+df1890a79aba7796e82955deb77d45aa6089f2ac
