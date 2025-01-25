@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(${CPP_NAME} VERSION "${CPP_VERISON}")
 
-find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 if(DEFINED Protobuf_PROTOC_EXECUTABLE)
   message("Overriding protoc to ${Protobuf_PROTOC_EXECUTABLE}")

@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package upstream.v1.message;
+
+message Data {
+  double data = 1;
+}

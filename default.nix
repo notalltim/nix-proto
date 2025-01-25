@@ -16,7 +16,5 @@
   generation = import ./generation.nix {inherit lib;};
 in {
   inherit (generation) mkProtoDerivation generateOverlays';
-  lib = {
-    inherit (utilities) srcFromNamespace nameFromNamespace overlayToList;
-  };
+  inherit (utilities) srcFromNamespace nameFromNamespace overlayToList;
 }

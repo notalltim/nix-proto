@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package upstream.v1.message;
+
+import "unnamespaced.proto";
+import "upstream/v1/message/data.proto";
+
+message Thing {
+  Data data = 1;
+}

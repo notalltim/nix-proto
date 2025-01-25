@@ -7,4 +7,5 @@ jobs:
   build-releases:
     uses: ./.github/workflows/build-multiple.yml
     with:
-      branch: release-23.11
+      nixpkgs: release-23.11
+      cache: "true"

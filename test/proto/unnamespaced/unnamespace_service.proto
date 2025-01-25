@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "unnamespaced.proto";
+
+
+message Request {
+  uint32 id = 1;
+}
+
+message Response {
+  uint32 id = 1;
+  Data data = 2;
+}
+
+service TestService {
+  rpc GetResponse (Request) returns (Response);
+}

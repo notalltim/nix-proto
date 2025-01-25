@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "middle/v1/message/data.proto";
+
+package test.v1.service;
+
+message Request {
+  uint32 id = 1;
+}
+
+message Response {
+  uint32 id = 1;
+  middle.v1.message.Data data = 2;
+}
+
+service TestService {
+  rpc getResponse (Request) returns (Response);
+}

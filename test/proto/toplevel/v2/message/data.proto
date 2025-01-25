@@ -1,0 +1,9 @@
+syntax = "proto3";
+package toplevel.v2.message;
+import "middle/v1/message/data.proto";
+
+
+message DataTest {
+  double data = 1;
+  middle.v1.message.Data this = 2;
+}

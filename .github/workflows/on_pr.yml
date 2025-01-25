@@ -4,28 +4,40 @@ on:
     branches:
       - main
 jobs:
-  build-supported-releases:
-    strategy:
-      matrix:
-        branches: [release-23.05, release-23.11, release-24.05, nixpkgs-unstable, master]
-    uses: ./.github/workflows/build-multiple.yml
-    with:
-      branch: ${{ matrix.branches }}
   build-supported-cross:
     strategy:
       matrix:
-        branches: [release-24.05]
+        releases: [release-24.05, release-24.11]
         architectures: [armv7l-hf-multiplatform, aarch64-multiplatform]
     uses: ./.github/workflows/build-multiple.yml
     with:
-      branch: ${{ matrix.branches }}
+      nixpkgs: ${{ matrix.releases }}
       architecture: ${{ matrix.architectures }}
+      repo: ${{ github.event.pull_request.head.repo.full_name }}
+      branch: ${{ github.event.pull_request.head.ref }}
+      cache: "true"
+  build-supported-releases:
+    strategy:
+      matrix:
+        releases: [release-23.11, release-24.05, release-24.11, nixpkgs-unstable, master]
+    uses: ./.github/workflows/build-multiple.yml
+    with:
+      nixpkgs: ${{ matrix.releases }}
+      repo: ${{ github.event.pull_request.head.repo.full_name }}
+      branch: ${{ github.event.pull_request.head.ref }}
+  # check-format:
+  #   uses: ./.github/workflows/format.yml
+  #   with:
+  #     repo: ${{ github.event.pull_request.head.repo.full_name }}
+  #     branch: ${{ github.event.pull_request.head.ref }}
+
   it-all-good:
     runs-on: ubuntu-latest
     if: always()
     needs:
       - build-supported-releases
       - build-supported-cross
+      # - check-format
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1

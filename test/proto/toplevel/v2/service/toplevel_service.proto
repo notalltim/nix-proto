@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package toplevel.v2.message;
+import "toplevel/v2/message/toplevel.proto";
+
+message Request { 
+  uint32 id = 1; 
+}
+
+message Response {
+  uint32 id = 1;
+  ToplevelMessage data = 2;
+}
+
+service TestService {
+  rpc GetResponse(Request) returns (Response);
+  rpc GetResponseStream(Request) returns (stream Response);
+}

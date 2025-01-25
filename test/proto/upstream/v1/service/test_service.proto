@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package upstream.v1.service;
+
+import "outer/inner/namespaced/test/v1/test.proto";
+import "upstream/v1/message/data.proto";
+
+message Request {
+  uint32 id = 1;
+}
+
+message Response {
+  uint32 id = 1;
+  upstream.v1.message.Data data = 2;
+  outer.inner.namespaced.test.v1.NamedData named_data = 3;
+}
+
+service TestService {
+  rpc GetResponse (Request) returns (Response);
+}

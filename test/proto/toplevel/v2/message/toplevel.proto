@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package toplevel.v2.message;
+import "google/protobuf/any.proto";
+import "toplevel/v2/message/data.proto";
+
+
+message ToplevelMessage {
+  double data = 1;
+  google.protobuf.Any test = 2;
+  toplevel.v2.message.DataTest test_data = 3;
+}
