@@ -25,11 +25,11 @@ jobs:
       nixpkgs: ${{ matrix.releases }}
       repo: ${{ github.event.pull_request.head.repo.full_name }}
       branch: ${{ github.event.pull_request.head.ref }}
-  # check-format:
-  #   uses: ./.github/workflows/format.yml
-  #   with:
-  #     repo: ${{ github.event.pull_request.head.repo.full_name }}
-  #     branch: ${{ github.event.pull_request.head.ref }}
+  check-format:
+    uses: ./.github/workflows/format.yml
+    with:
+      repo: ${{ github.event.pull_request.head.repo.full_name }}
+      branch: ${{ github.event.pull_request.head.ref }}
 
   it-all-good:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
     needs:
       - build-supported-releases
       - build-supported-cross
-      # - check-format
+      - check-format
     steps:
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
