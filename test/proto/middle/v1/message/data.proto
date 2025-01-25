@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "upstream/v1/message/data.proto";
 package middle.v1.message;
+import "upstream/v1/message/data.proto";
 
 message Data {
   double data = 1;

@@ -11,10 +11,7 @@ let
       protoDeps = [ ];
     };
     upstream =
-      {
-        namespaced,
-        unnamespaced,
-      }:
+      { namespaced, unnamespaced }:
       nix-proto.mkProtoDerivation {
         name = "upstream";
         src = nix-proto.srcFromNamespace {
@@ -49,10 +46,7 @@ let
       };
 
     toplevel =
-      {
-        upstream,
-        middle,
-      }:
+      { upstream, middle }:
       nix-proto.mkProtoDerivation {
         name = "toplevel";
         src = nix-proto.srcFromNamespace {
