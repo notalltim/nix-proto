@@ -1,24 +1,30 @@
-{lib}: {
+{ lib }:
+{
   name,
   version,
   dependencies,
   pythonVersion,
-}: let
+}:
+let
   toml = lib.serde.toTOML {
     project = {
       inherit name version dependencies;
       requires-python = ">=${pythonVersion}";
     };
     build-system = {
-      requires = ["setuptools"];
+      requires = [ "setuptools" ];
       build-backend = "setuptools.build_meta";
     };
     tool.setuptools = {
       include-package-data = true;
-      package-data."*" = ["*.pyi" "*.txt"];
+      package-data."*" = [
+        "*.pyi"
+        "*.txt"
+      ];
     };
   };
-in ''
+in
+''
   cat > pyproject.toml << EOF ${toml}
   EOF
   cat > setup.py << EOF

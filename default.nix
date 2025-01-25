@@ -2,7 +2,8 @@
   nix_lib,
   std,
   filter,
-}: let
+}:
+let
   internal_lib = import ./lib.nix {
     inherit filter;
     lib = nix_lib;
@@ -13,8 +14,9 @@
   lib = std // nix_lib // internal_lib.common // internal_lib.utilities;
 
   # Generation functions
-  generation = import ./generation.nix {inherit lib;};
-in {
+  generation = import ./generation.nix { inherit lib; };
+in
+{
   inherit (generation) mkProtoDerivation generateOverlays';
   inherit (utilities) srcFromNamespace nameFromNamespace overlayToList;
 }
