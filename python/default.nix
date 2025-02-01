@@ -139,18 +139,14 @@ rec {
       pkgs,
       __proto_internal_meta_package,
       python,
-      buildPackages,
       substituteAll,
       writeTextFile,
     }:
     let
       # Python Dependencies
       inherit (python.pkgs) buildPythonPackage protobuf;
-      # Native build dependencies
-      inherit
-        (buildPackages.${"python" + (concatStrings (splitVersion python.pythonVersion)) + "Packages"})
-        setuptools
-        ;
+      # Native build dependencies `python.pythonForBuild` is deprecated remove when 23.05 is no longer supported
+      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs) setuptools;
 
       # Package meta data
       protoMeta = loadMeta __proto_internal_meta_package;
@@ -187,10 +183,7 @@ rec {
         ;
       pyproject = true;
 
-      nativeBuildInputs = [
-        buildPackages.protobuf
-        setuptools
-      ]; # for import checking
+      nativeBuildInputs = [ setuptools ]; # for import checking
       propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
 
       prePatch = ''
@@ -240,15 +233,10 @@ rec {
       pkgs,
       __proto_internal_meta_package,
       python,
-      buildPackages,
     }:
     let
-      # Native build tools pulled from the compatible python version
-      inherit
-        (buildPackages.${"python" + (concatStrings (splitVersion python.pythonVersion)) + "Packages"})
-        grpcio-tools
-        setuptools
-        ;
+      # Native build dependencies `python.pythonForBuild` is deprecated remove when 23.05 is no longer supported
+      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs) grpcio-tools setuptools;
 
       # Python dependencies pulled from the given python package
       inherit (python.pkgs) buildPythonPackage protobuf grpcio;
