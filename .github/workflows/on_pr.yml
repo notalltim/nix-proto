@@ -25,7 +25,7 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        releases: [release-23.11, release-24.05, release-24.11, releases-25.05, nixpkgs-unstable, master]
+        releases: [release-23.11, release-24.05, release-24.11, release-25.05, nixpkgs-unstable, master]
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: ${{ matrix.releases }}
