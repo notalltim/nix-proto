@@ -5,9 +5,12 @@ on:
       - main
 jobs:
   build-supported-cross:
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
-        releases: [release-24.05, release-24.11]
+        releases: [release-24.11, release-25.05]
         architectures: [armv7l-hf-multiplatform, aarch64-multiplatform]
     uses: ./.github/workflows/build-multiple.yml
     with:
@@ -17,9 +20,12 @@ jobs:
       branch: ${{ github.event.pull_request.head.ref }}
       cache: "true"
   build-supported-releases:
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
-        releases: [release-23.11, release-24.05, release-24.11, nixpkgs-unstable, master]
+        releases: [release-23.11, release-24.05, release-24.11, releases-25.05, nixpkgs-unstable, master]
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: ${{ matrix.releases }}
@@ -30,7 +36,6 @@ jobs:
     with:
       repo: ${{ github.event.pull_request.head.repo.full_name }}
       branch: ${{ github.event.pull_request.head.ref }}
-
   it-all-good:
     runs-on: ubuntu-latest
     if: always()

@@ -5,6 +5,9 @@ on:
   workflow_dispatch:
 jobs:
   build-releases:
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: release-24.05

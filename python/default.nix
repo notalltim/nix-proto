@@ -249,7 +249,8 @@ rec {
       dependencies = [
         protobuf
         grpcio
-      ] ++ (toBuildDepsPy (protoMeta.protoDeps ++ [ protoMeta ]) python.pkgs); # Pull python deps from the current python package set
+      ]
+      ++ (toBuildDepsPy (protoMeta.protoDeps ++ [ protoMeta ]) python.pkgs); # Pull python deps from the current python package set
 
       # PyProjectTOML file for generated code
       py_project_toml = toPyProjectTOML {
@@ -258,7 +259,8 @@ rec {
         dependencies = [
           "protobuf"
           "grpcio"
-        ] ++ toPythonDependencies (protoMeta.protoDeps ++ [ protoMeta ]);
+        ]
+        ++ toPythonDependencies (protoMeta.protoDeps ++ [ protoMeta ]);
         pythonVersion = python.pythonVersion;
       };
 
@@ -332,11 +334,15 @@ rec {
 
       dependencies = [
         pkgs.python3Packages.protobuf
-      ] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
+      ]
+      ++ (toBuildDepsPy proto_meta.protoDeps pkgs)
+      ++ buildInputs;
       nativeBuildInputs = [
         pkgs.buildPackages.protobuf
         pkgs.buildPackages.python3Packages.setuptools
-      ] ++ nativeInputs ++ dependencies; # for import checking
+      ]
+      ++ nativeInputs
+      ++ dependencies; # for import checking
       propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
 
       py_project_toml = toPyProjectTOML {
@@ -440,7 +446,8 @@ rec {
         pkgs.grpc
         pkgs.openssl
         pkgs.zlib
-      ] ++ (toBuildDepsPy [ proto_meta ] pkgs);
+      ]
+      ++ (toBuildDepsPy [ proto_meta ] pkgs);
       nativeInputs = [ pkgs.buildPackages.python3Packages.grpcio-tools ];
       inputDependencies = [ "grpcio" ];
       # * Generate each proto file using grpcio and add the generated code to the __init__.py file to allow for top level imports

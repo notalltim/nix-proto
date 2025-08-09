@@ -180,7 +180,8 @@ rec {
     - [returns] Attribute set of code generation derivations.
   */
   generateDerivations = name: {
-    ${name + "_proto_" + "drv"} = nixProtoWarn "${name}_proto is deperacted use ${name} for the functionality" generateProto;
+    ${name + "_proto_" + "drv"} =
+      nixProtoWarn "${name}_proto is deperacted use ${name} for the functionality" generateProto;
     ${name + "_proto_" + "cpp_drv"} = generateCpp;
     ${name + "_grpc_" + "cpp_drv"} = generateGRPCCpp;
     ${name + "_proto_" + "descriptor_drv"} = generateDescriptor;

@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     nix-std.url = "github:chessai/nix-std";
     nix-filter.url = "github:numtide/nix-filter";
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -42,8 +42,16 @@
           legacyPackages = pkgs;
           formatter = pkgs.nixfmt-rfc-style;
           treefmt.programs = {
-            nixfmt-rfc-style.enable = true;
-            yamlfmt.enable = true;
+            nixfmt = {
+              enable = true;
+              package = pkgs.nixfmt-tree;
+            };
+            yamlfmt = {
+              enable = true;
+              settings = {
+                formatter.trim_trailing_whitespace = true;
+              };
+            };
             protolint.enable = true;
           };
         };

@@ -5,9 +5,12 @@ on:
   workflow_dispatch:
 jobs:
   build-releases:
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
-        releases: [release-24.05,release-24.11]
+        releases: [release-24.11, release-25.05]
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: ${{ matrix.releases }}
