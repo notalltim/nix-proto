@@ -40,12 +40,8 @@
             overlays = builtins.attrValues self.overlays;
           };
           legacyPackages = pkgs;
-          formatter = pkgs.nixfmt-rfc-style;
           treefmt.programs = {
-            nixfmt = {
-              enable = true;
-              package = pkgs.nixfmt-tree;
-            };
+            nixfmt.enable = true;
             yamlfmt = {
               enable = true;
               settings = {
