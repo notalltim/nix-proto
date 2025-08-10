@@ -14,6 +14,7 @@ rec {
     nixProtoWarn
     ;
   inherit (lib.versions) splitVersion;
+  inherit (builtins) tryEval;
   /*
     *
     Convert a set of attribute sets of metadata to a list of strings representing pyProjectTOML dependencies.
@@ -139,7 +140,8 @@ rec {
       pkgs,
       __proto_internal_meta_package,
       python,
-      substituteAll,
+      substituteAll ? null,
+      replaceVars ? null,
       writeTextFile,
     }:
     let
@@ -156,10 +158,19 @@ rec {
       dependencies = [ protobuf ] ++ (toBuildDepsPy protoDeps python.pkgs);
 
       # Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
-      descriptor_py = substituteAll {
-        src = ./descriptor.py;
-        package = protoMeta.name + "_proto_py";
-      };
+      descriptor_py =
+        if
+          (tryEval (substituteAll {
+            src = ./descriptor.py;
+            package = protoMeta.name + "_proto_py";
+          })).success
+        then
+          substituteAll {
+            src = ./descriptor.py;
+            package = protoMeta.name + "_proto_py";
+          }
+        else
+          replaceVars ./descriptor.py { package = protoMeta.name + "_proto_py"; };
       descriptors = writeTextFile {
         name = "descriptors.txt";
         text = concatStringsSep "\n" (toBuildDepsDescriptor fullProtoDeps pkgs);
@@ -388,10 +399,23 @@ rec {
         proto_meta = loadMeta __proto_internal_meta_package;
         suffix = "_proto_py";
         # * Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
-        descriptor_py = pkgs.substituteAll {
-          src = ./descriptor.py;
-          package = proto_meta.name + suffix;
-        };
+        descriptor_py =
+          if
+            (tryEval (
+              pkgs.substituteAll {
+                src = ./descriptor.py;
+                package = proto_meta.name + "_proto_py";
+              }
+            )).success
+          then
+            pkgs.substituteAll {
+              src = ./descriptor.py;
+              package = proto_meta.name + suffix;
+            }
+          else
+            pkgs.replaceVars ./descriptor.py {
+              package = proto_meta.name + suffix;
+            };
 
         descriptors = pkgs.writeTextFile {
           name = "descriptors.txt";
