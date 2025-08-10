@@ -1,4 +1,4 @@
-name: master
+name: "25.05 "
 on:
   schedule:
     - cron: '12 6 * * *'
@@ -10,5 +10,5 @@ jobs:
       id-token: write
     uses: ./.github/workflows/build-multiple.yml
     with:
-      nixpkgs: master
+      nixpkgs: release-25.05
       cache: "true"

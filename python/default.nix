@@ -14,6 +14,7 @@ rec {
     nixProtoWarn
     ;
   inherit (lib.versions) splitVersion;
+  inherit (builtins) tryEval;
   /*
     *
     Convert a set of attribute sets of metadata to a list of strings representing pyProjectTOML dependencies.
@@ -139,7 +140,8 @@ rec {
       pkgs,
       __proto_internal_meta_package,
       python,
-      substituteAll,
+      substituteAll ? null,
+      replaceVars ? null,
       writeTextFile,
     }:
     let
@@ -156,10 +158,19 @@ rec {
       dependencies = [ protobuf ] ++ (toBuildDepsPy protoDeps python.pkgs);
 
       # Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
-      descriptor_py = substituteAll {
-        src = ./descriptor.py;
-        package = protoMeta.name + "_proto_py";
-      };
+      descriptor_py =
+        if
+          (tryEval (substituteAll {
+            src = ./descriptor.py;
+            package = protoMeta.name + "_proto_py";
+          })).success
+        then
+          substituteAll {
+            src = ./descriptor.py;
+            package = protoMeta.name + "_proto_py";
+          }
+        else
+          replaceVars ./descriptor.py { package = protoMeta.name + "_proto_py"; };
       descriptors = writeTextFile {
         name = "descriptors.txt";
         text = concatStringsSep "\n" (toBuildDepsDescriptor fullProtoDeps pkgs);
@@ -249,7 +260,8 @@ rec {
       dependencies = [
         protobuf
         grpcio
-      ] ++ (toBuildDepsPy (protoMeta.protoDeps ++ [ protoMeta ]) python.pkgs); # Pull python deps from the current python package set
+      ]
+      ++ (toBuildDepsPy (protoMeta.protoDeps ++ [ protoMeta ]) python.pkgs); # Pull python deps from the current python package set
 
       # PyProjectTOML file for generated code
       py_project_toml = toPyProjectTOML {
@@ -258,7 +270,8 @@ rec {
         dependencies = [
           "protobuf"
           "grpcio"
-        ] ++ toPythonDependencies (protoMeta.protoDeps ++ [ protoMeta ]);
+        ]
+        ++ toPythonDependencies (protoMeta.protoDeps ++ [ protoMeta ]);
         pythonVersion = python.pythonVersion;
       };
 
@@ -332,11 +345,15 @@ rec {
 
       dependencies = [
         pkgs.python3Packages.protobuf
-      ] ++ (toBuildDepsPy proto_meta.protoDeps pkgs) ++ buildInputs;
+      ]
+      ++ (toBuildDepsPy proto_meta.protoDeps pkgs)
+      ++ buildInputs;
       nativeBuildInputs = [
         pkgs.buildPackages.protobuf
         pkgs.buildPackages.python3Packages.setuptools
-      ] ++ nativeInputs ++ dependencies; # for import checking
+      ]
+      ++ nativeInputs
+      ++ dependencies; # for import checking
       propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
 
       py_project_toml = toPyProjectTOML {
@@ -382,10 +399,23 @@ rec {
         proto_meta = loadMeta __proto_internal_meta_package;
         suffix = "_proto_py";
         # * Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
-        descriptor_py = pkgs.substituteAll {
-          src = ./descriptor.py;
-          package = proto_meta.name + suffix;
-        };
+        descriptor_py =
+          if
+            (tryEval (
+              pkgs.substituteAll {
+                src = ./descriptor.py;
+                package = proto_meta.name + "_proto_py";
+              }
+            )).success
+          then
+            pkgs.substituteAll {
+              src = ./descriptor.py;
+              package = proto_meta.name + suffix;
+            }
+          else
+            pkgs.replaceVars ./descriptor.py {
+              package = proto_meta.name + suffix;
+            };
 
         descriptors = pkgs.writeTextFile {
           name = "descriptors.txt";
@@ -440,7 +470,8 @@ rec {
         pkgs.grpc
         pkgs.openssl
         pkgs.zlib
-      ] ++ (toBuildDepsPy [ proto_meta ] pkgs);
+      ]
+      ++ (toBuildDepsPy [ proto_meta ] pkgs);
       nativeInputs = [ pkgs.buildPackages.python3Packages.grpcio-tools ];
       inputDependencies = [ "grpcio" ];
       # * Generate each proto file using grpcio and add the generated code to the __init__.py file to allow for top level imports

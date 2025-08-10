@@ -141,29 +141,29 @@ rec {
       propagatedBuildInputs = [ protobuf ] ++ (toBuildDepsCpp meta.protoDeps pkgs);
       nativeBuildInputs = [
         cmake
-      ] ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) [ pkgs.buildPackages.protobuf ];
+      ]
+      ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) [ pkgs.buildPackages.protobuf ];
 
-      cmakeFlags =
-        [
-          "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-          "-DCPP_NAME=${name}"
-          "-DCPP_VERSION=${version}"
-          "-DPROTOS=${toProtoPathsCMake meta}"
-          "-DCPP_DEPS=${toCMakeDependencies meta.protoDeps}"
-        ]
-        ++ optionals (!pkgs.stdenv.hostPlatform.isStatic) [
-          "-DBUILD_SHARED_LIBS=ON" # build shared libs by default
-        ]
-        ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) (
-          let
-            protobufVersion =
-              if (lib.versionOlder protobuf.version "5") then
-                "protobuf${lib.versions.major protobuf.version}_${lib.versions.minor protobuf.version}"
-              else
-                "protobuf_${lib.versions.major protobuf.version}";
-          in
-          [ "-DProtobuf_PROTOC_EXECUTABLE=${pkgs.buildPackages."${protobufVersion}"}/bin/protoc" ]
-        );
+      cmakeFlags = [
+        "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+        "-DCPP_NAME=${name}"
+        "-DCPP_VERSION=${version}"
+        "-DPROTOS=${toProtoPathsCMake meta}"
+        "-DCPP_DEPS=${toCMakeDependencies meta.protoDeps}"
+      ]
+      ++ optionals (!pkgs.stdenv.hostPlatform.isStatic) [
+        "-DBUILD_SHARED_LIBS=ON" # build shared libs by default
+      ]
+      ++ optionals (stdenv.hostPlatform != stdenv.buildPlatform) (
+        let
+          protobufVersion =
+            if (lib.versionOlder protobuf.version "5") then
+              "protobuf${lib.versions.major protobuf.version}_${lib.versions.minor protobuf.version}"
+            else
+              "protobuf_${lib.versions.major protobuf.version}";
+        in
+        [ "-DProtobuf_PROTOC_EXECUTABLE=${pkgs.buildPackages."${protobufVersion}"}/bin/protoc" ]
+      );
 
       cmakeFile = pkgs.writeText "CMakeLists.txt" protobufCmake;
       cmakeFileConfig = pkgs.writeText "${name}Config.cmake.in" protobufCmakeConfig;
@@ -220,40 +220,41 @@ rec {
         protobuf
         grpc
         openssl
-      ] ++ (toBuildDepsCpp (meta.protoDeps ++ [ meta ]) pkgs);
-      nativeBuildInputs =
-        [ cmake ]
-        ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) [
-          protobuf
-          grpc
-        ];
+      ]
+      ++ (toBuildDepsCpp (meta.protoDeps ++ [ meta ]) pkgs);
+      nativeBuildInputs = [
+        cmake
+      ]
+      ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) [
+        protobuf
+        grpc
+      ];
       propagatedNativeBuildInputs = [ pkg-config ]; # Needed because some cmake dependencies use pkg-config
 
-      cmakeFlags =
+      cmakeFlags = [
+        "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+        "-DCPP_NAME=${name}"
+        "-DCPP_VERSION=${version}"
+        "-DPROTOS=${toProtoPathsCMake meta}"
+        "-DCPP_DEPS=${toCMakeDependencies (meta.protoDeps ++ [ meta ])}"
+      ]
+      ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) (
+        let
+          protobufVersion =
+            if (lib.versionOlder protobuf.version "5") then
+              "protobuf${lib.versions.major protobuf.version}_${lib.versions.minor protobuf.version}"
+            else
+              "protobuf_${lib.versions.major protobuf.version}";
+        in
         [
-          "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-          "-DCPP_NAME=${name}"
-          "-DCPP_VERSION=${version}"
-          "-DPROTOS=${toProtoPathsCMake meta}"
-          "-DCPP_DEPS=${toCMakeDependencies (meta.protoDeps ++ [ meta ])}"
+          "-DProtobuf_PROTOC_EXECUTABLE=${pkgs.buildPackages."${protobufVersion}"}/bin/protoc"
+          "-DgRPC_PLUGIN_EXECUTABLE=${pkgs.buildPackages.grpc}/bin/grpc_cpp_plugin"
+          "-DCMAKE_CROSSCOMPILING=OFF" # Needed due to GRPC relying on the CMAKE_CROSSCOMPILING for adding the plugin targets
         ]
-        ++ optionals (pkgs.stdenv.hostPlatform != pkgs.stdenv.buildPlatform) (
-          let
-            protobufVersion =
-              if (lib.versionOlder protobuf.version "5") then
-                "protobuf${lib.versions.major protobuf.version}_${lib.versions.minor protobuf.version}"
-              else
-                "protobuf_${lib.versions.major protobuf.version}";
-          in
-          [
-            "-DProtobuf_PROTOC_EXECUTABLE=${pkgs.buildPackages."${protobufVersion}"}/bin/protoc"
-            "-DgRPC_PLUGIN_EXECUTABLE=${pkgs.buildPackages.grpc}/bin/grpc_cpp_plugin"
-            "-DCMAKE_CROSSCOMPILING=OFF" # Needed due to GRPC relying on the CMAKE_CROSSCOMPILING for adding the plugin targets
-          ]
-        )
-        ++ optionals (!pkgs.stdenv.hostPlatform.isStatic) [
-          "-DBUILD_SHARED_LIBS=ON" # build shared libs by default
-        ];
+      )
+      ++ optionals (!pkgs.stdenv.hostPlatform.isStatic) [
+        "-DBUILD_SHARED_LIBS=ON" # build shared libs by default
+      ];
 
       cmakeFile = pkgs.writeText "CMakeLists.txt" grpcCmake;
       cmakeFileConfig = pkgs.writeText "${name}Config.cmake.in" grpcCmakeConfig;
