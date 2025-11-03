@@ -325,7 +325,7 @@ rec {
         in
         nameValuePair key (
           nixProtoWarn
-            "Accessing ${key} directly is deperacted use python3Packages.${key}. Specific python package sets are also supported e.g. python310Packages"
+            "Accessing ${key} directly is deprecated use python3Packages.${key}. Specific python package sets are also supported e.g. python310Packages"
             final.python3Packages.${key}
         )
       ) pythonOverlayDrvs;
