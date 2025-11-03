@@ -141,7 +141,7 @@ rec {
       __proto_internal_meta_package,
       python,
       substituteAll ? null,
-      replaceVars ? null,
+      replaceVars ? _: _: builtins.throw "Missing replaceVars",
       writeTextFile,
     }:
     let
@@ -159,18 +159,13 @@ rec {
 
       # Generate each proto file using protoc and add the generated code to the __init__.py file to allow for top level imports
       descriptor_py =
-        if
-          (tryEval (substituteAll {
-            src = ./descriptor.py;
-            package = protoMeta.name + "_proto_py";
-          })).success
-        then
+        if (tryEval (replaceVars ./descriptor.py { package = protoMeta.name + "_proto_py"; })).success then
+          replaceVars ./descriptor.py { package = protoMeta.name + "_proto_py"; }
+        else
           substituteAll {
             src = ./descriptor.py;
             package = protoMeta.name + "_proto_py";
-          }
-        else
-          replaceVars ./descriptor.py { package = protoMeta.name + "_proto_py"; };
+          };
       descriptors = writeTextFile {
         name = "descriptors.txt";
         text = concatStringsSep "\n" (toBuildDepsDescriptor fullProtoDeps pkgs);
