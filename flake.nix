@@ -40,6 +40,27 @@
             overlays = builtins.attrValues self.overlays;
           };
           legacyPackages = pkgs;
+          checks =
+            let
+              python = pkgs.python3.withPackages (ps: [
+                ps.upstream_proto_py
+                ps.upstream_grpc_py
+                ps.grpcio
+              ]);
+            in
+            {
+              typecheck = pkgs.runCommand "typecheck-grpc-stubs" {
+                nativeBuildInputs = [
+                  pkgs.basedpyright
+                  python
+                ];
+              } ''
+                export HOME=$(mktemp -d)
+                cd ${./test}
+                basedpyright --pythonpath ${python}/bin/python --level error typecheck.py
+                touch $out
+              '';
+            };
           treefmt.programs = {
             nixfmt.enable = true;
             yamlfmt = {
