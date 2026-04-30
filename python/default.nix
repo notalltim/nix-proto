@@ -243,7 +243,11 @@ rec {
     }:
     let
       # Native build dependencies `python.pythonForBuild` is deprecated remove when 23.05 is no longer supported
-      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs) grpcio-tools setuptools mypy-protobuf;
+      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs)
+        grpcio-tools
+        setuptools
+        mypy-protobuf
+        ;
 
       # Python dependencies pulled from the given python package
       inherit (python.pkgs) buildPythonPackage protobuf grpcio;

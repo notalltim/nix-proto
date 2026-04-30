@@ -49,17 +49,20 @@
               ]);
             in
             {
-              typecheck = pkgs.runCommand "typecheck-grpc-stubs" {
-                nativeBuildInputs = [
-                  pkgs.basedpyright
-                  python
-                ];
-              } ''
-                export HOME=$(mktemp -d)
-                cd ${./test}
-                basedpyright --pythonpath ${python}/bin/python --level error typecheck.py
-                touch $out
-              '';
+              typecheck =
+                pkgs.runCommand "typecheck-grpc-stubs"
+                  {
+                    nativeBuildInputs = [
+                      pkgs.basedpyright
+                      python
+                    ];
+                  }
+                  ''
+                    export HOME=$(mktemp -d)
+                    cd ${./test}
+                    basedpyright --pythonpath ${python}/bin/python --level error typecheck.py
+                    touch $out
+                  '';
             };
           treefmt.programs = {
             nixfmt.enable = true;
