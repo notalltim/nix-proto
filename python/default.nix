@@ -194,6 +194,7 @@ rec {
 
       prePatch = ''
         mkdir -p src/${name}
+        touch src/${name}/py.typed
         echo Adding descriptor files to src/${name}
         cp ${descriptor_py} src/${name}/descriptor.py
         cp ${descriptors}  src/${name}/descriptors.txt
@@ -242,7 +243,11 @@ rec {
     }:
     let
       # Native build dependencies `python.pythonForBuild` is deprecated remove when 23.05 is no longer supported
-      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs) grpcio-tools setuptools;
+      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs)
+        grpcio-tools
+        setuptools
+        mypy-protobuf
+        ;
 
       # Python dependencies pulled from the given python package
       inherit (python.pkgs) buildPythonPackage protobuf grpcio;
@@ -285,6 +290,7 @@ rec {
 
       nativeBuildInputs = [
         grpcio-tools
+        mypy-protobuf
         setuptools
       ]; # for import checking
       propagatedBuildInputs = dependencies; # This is needed because `dependencies` only works on unstable right now
@@ -292,9 +298,14 @@ rec {
       # Generate the GRPC stubs / servers
       prePatch = ''
         mkdir -p src/${name}
+        touch src/${name}/py.typed
         shopt -s globstar
         for proto in `find "${src}" -type f -name "*.proto"`; do
-          python -m grpc_tools.protoc ${toProtocInclude fullProtoDeps} --grpc_python_out=src/${name} $proto
+          python -m grpc_tools.protoc ${toProtocInclude fullProtoDeps} \
+            --grpc_python_out=src/${name} \
+            --mypy_grpc_out=src/${name} \
+            --plugin=protoc-gen-mypy_grpc=${mypy-protobuf}/bin/protoc-gen-mypy_grpc \
+            $proto
           echo "from .$(realpath --relative-to="${src}" "$proto" | sed 's/\.[^.]*$//;s/[/]/./g;s/*[.]\././')_pb2_grpc import *" >> src/${name}/__init__.py
         done
       '';
