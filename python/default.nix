@@ -147,8 +147,8 @@ rec {
     let
       # Python Dependencies
       inherit (python.pkgs) buildPythonPackage protobuf;
-      # Native build dependencies `python.pythonForBuild` is deprecated remove when 23.05 is no longer supported
-      inherit ((python.pythonOnBuildForHost or python.pythonForBuild).pkgs) setuptools;
+      # Use callPackage once 24.11 support is dropped
+      inherit (python.pythonOnBuildForHost.pkgs) setuptools;
 
       # Package meta data
       protoMeta = loadMeta __proto_internal_meta_package;
@@ -237,7 +237,6 @@ rec {
   */
   grpc =
     {
-      pkgs,
       __proto_internal_meta_package,
       python,
     }:

@@ -177,7 +177,7 @@ rec {
 
       # There is a problem with newer version of Protobuf when generating GRPC code that causes a build failure without adding a local dir to the list of includes for the proto generation
       preConfigure = ''
-        cmakeFlags="-DPROTO_DEPS=${(toProtoDepsCMake ((recursiveProtoDeps meta.protoDeps)))};$PWD $cmakeFlags"
+        cmakeFlags="-DPROTO_DEPS=${(toProtoDepsCMake (recursiveProtoDeps meta.protoDeps))};$PWD $cmakeFlags"
       '';
 
       outputs = [
