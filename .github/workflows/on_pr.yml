@@ -10,7 +10,7 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        releases: [release-24.11, release-25.05]
+        releases: [release-25.11, release-25.05]
         architectures: [armv7l-hf-multiplatform, aarch64-multiplatform]
     uses: ./.github/workflows/build-multiple.yml
     with:
@@ -25,7 +25,15 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        releases: [release-23.11, release-24.05, release-24.11, release-25.05, nixpkgs-unstable, master]
+        releases:
+          [
+            release-24.05,
+            release-24.11,
+            release-25.05,
+            release-25.11,
+            nixpkgs-unstable,
+            master,
+          ]
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: ${{ matrix.releases }}
