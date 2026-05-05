@@ -4,10 +4,10 @@ runs:
   using: "composite"
   steps:
     - uses: DeterminateSystems/nix-installer-action@main
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: "Format"
       run: nix flake check
       shell: bash
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         path: action

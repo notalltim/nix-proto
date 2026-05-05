@@ -74,6 +74,7 @@
               };
             };
             protolint.enable = true;
+            actionlint.enable = true;
           };
         };
     };

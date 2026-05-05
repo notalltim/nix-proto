@@ -14,13 +14,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: ${{ inputs.repo == 'notalltim/nix-proto'}}
         with:
           sparse-checkout: .github
           path: action
           ref: refs/heads/${{ inputs.branch }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: ${{ inputs.repo != 'notalltim/nix-proto'}}
         with:
           sparse-checkout: .github

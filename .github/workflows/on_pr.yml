@@ -18,7 +18,7 @@ jobs:
       architecture: ${{ matrix.architectures }}
       repo: ${{ github.event.pull_request.head.repo.full_name }}
       branch: ${{ github.event.pull_request.head.ref }}
-      cache: "true"
+      cache: "use"
   build-supported-releases:
     permissions:
       contents: read

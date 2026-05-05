@@ -1,4 +1,4 @@
-name: "23.11 "
+name: "25.11 "
 on:
   schedule:
     - cron: "12 6 * * *"
@@ -11,4 +11,4 @@ jobs:
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: release-25.11
-      cache: "true"
+      cache: "use"

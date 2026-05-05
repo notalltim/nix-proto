@@ -15,4 +15,4 @@ jobs:
     with:
       nixpkgs: ${{ matrix.releases }}
       architecture: aarch64-multiplatform
-      cache: "true"
+      cache: "use"
