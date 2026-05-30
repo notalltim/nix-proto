@@ -4,7 +4,7 @@ inputs:
   branch:
     description: "Branch of repo to build"
     required: true
-    default: 'main'
+    default: "main"
   repo:
     description: "Full name of repo formatted as OWNER/REPO"
     required: false
@@ -12,23 +12,23 @@ inputs:
   nixpkgs:
     description: "Branch of nixpkgs to checkout"
     required: true
-    default: 'release-23.11'
+    default: "release-23.11"
   architecture:
     description: "Architecture to build with"
     required: false
-    default: 'x86-64'
+    default: "x86-64"
   cache:
     description: "Use nix magic cache"
     required: false
-    default: "false"
+    default: ""
 runs:
   using: "composite"
   steps:
     - uses: DeterminateSystems/nix-installer-action@main
     - name: Optional cache
-      if: ${{ inputs.cache == 'true' }}
+      if: ${{ inputs.cache == 'use' }}
       uses: DeterminateSystems/magic-nix-cache-action@main
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         path: repo
     - name: Native build
@@ -53,7 +53,7 @@ runs:
         --override-input nixpkgs github:NixOS/nixpkgs/${{ inputs.nixpkgs }} -L
       shell: bash
       working-directory: repo
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: ${{ inputs.architecture  == 'x86-64'}}
       with:
         repository: notalltim/test-apis
@@ -73,6 +73,6 @@ runs:
         --override-input upstream-apis github:notalltim/upstream-apis -L
       shell: bash
       working-directory: test-repo
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         path: action

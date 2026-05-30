@@ -1,7 +1,7 @@
 name: "24.05 "
 on:
   schedule:
-    - cron: '12 6 * * *'
+    - cron: "12 6 * * *"
   workflow_dispatch:
 jobs:
   build-releases:
@@ -11,4 +11,4 @@ jobs:
     uses: ./.github/workflows/build-multiple.yml
     with:
       nixpkgs: release-24.05
-      cache: "true"
+      cache: "use"

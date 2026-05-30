@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.11";
     nix-std.url = "github:chessai/nix-std";
     nix-filter.url = "github:numtide/nix-filter";
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -66,6 +66,7 @@
             };
           treefmt.programs = {
             nixfmt.enable = true;
+            nixf-diagnose.enable = true;
             yamlfmt = {
               enable = true;
               settings = {
@@ -73,6 +74,7 @@
               };
             };
             protolint.enable = true;
+            actionlint.enable = true;
           };
         };
     };
