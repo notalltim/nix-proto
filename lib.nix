@@ -2,7 +2,7 @@
 let
   inherit (lib.strings) splitString concatStringsSep;
   inherit (lib.lists)
-    fold
+    foldr
     flatten
     concatMap
     unique
@@ -31,7 +31,7 @@ let
 
       [meta_list]: List of meta attribute sets containing at minimum a `src` attribute
     */
-    toProtocInclude = meta_list: fold (a: b: "-I=" + toString (a.src) + " " + b) "" meta_list;
+    toProtocInclude = meta_list: foldr (a: b: "-I=" + toString (a.src) + " " + b) "" meta_list;
 
     /*
       *

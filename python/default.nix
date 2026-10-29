@@ -35,10 +35,7 @@ rec {
     - [returns] List of Strings of the form `name>=version`
   */
   toPythonDependencies =
-    deps:
-    forEach deps (
-      dep: builtins.toString (dep.name + "_proto_py") + ">=" + builtins.toString (dep.version)
-    );
+    deps: forEach deps (dep: toString (dep.name + "_proto_py") + ">=" + toString (dep.version));
 
   /*
     *
@@ -141,7 +138,7 @@ rec {
       __proto_internal_meta_package,
       python,
       substituteAll ? null,
-      replaceVars ? _: _: builtins.throw "Missing replaceVars",
+      replaceVars ? _: _: throw "Missing replaceVars",
       writeTextFile,
     }:
     let
